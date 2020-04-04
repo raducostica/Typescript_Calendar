@@ -2,171 +2,73 @@ import React, { useState, useEffect } from "react";
 
 import calendarStyles from "../styles/calendar.module.css";
 
-interface WeekDays {
-  [key: number]: string;
-}
-
-const getDaysinMonth = (month: number, year: number): number => {
-  return 32 - new Date(year, month, 32).getDate();
-};
-
-const getArrayOfDayComponent = (year: number, month: number, today: number) => {
-  let days: object[] = [];
-  let firstDay: number = new Date(year, month).getDay();
-  let numOfDays: number = getDaysinMonth(month, year);
-  let day = 1;
-
-  for (let i = 1; i < 50; i++) {
-    if (day > numOfDays) {
-      break;
-    } else if (i <= firstDay) {
-      days.push(<span></span>);
-    } else {
-      if (
-        day === today &&
-        month === new Date().getMonth() &&
-        year === new Date().getFullYear()
-      ) {
-        days.push(<span className={calendarStyles.active}>{day}</span>);
-      } else {
-        days.push(<span>{day}</span>);
-      }
-      day++;
-    }
-  }
-
-  console.log(days);
-
-  return days;
-};
-
-const getDaysOfWeek = () => {
-  let daysOfWeek: object[] = [];
-  let week: WeekDays = {
-    1: "Sunday",
-    2: "Monday",
-    3: "Tuesday",
-    4: "Wednesday",
-    5: "Thursday",
-    6: "Friday",
-    7: "Saturday"
-  };
-
-  for (let i in week) {
-    daysOfWeek.push(
-      <div key={week[i]} className={calendarStyles.days}>
-        {week[i]}
-      </div>
-    );
-  }
-
-  return daysOfWeek;
-};
-
-interface Days {
-  days: object[];
-  today: number;
-  month: number;
+interface Calendar {
+  days: Array<Array<{ id: number; selected: boolean }>>;
   year: number;
-  monthName: string;
+  month: number;
+  today: number;
   challengeDays: number;
   startDate: number;
   startMonth: number;
+  startYear: number;
   active: boolean;
+  currentMonth: Array<{ id: number; selected: boolean }>;
 }
 
-const Calendar: React.FC = () => {
-  const [state, setState] = useState<Days>({
+const Calendar = () => {
+  const [state, setState] = useState<Calendar>({
     days: [],
-    today: 0,
     month: 0,
     year: 0,
-    monthName: "",
+    today: 0,
     challengeDays: 0,
-    startDate: 4,
+    startDate: 0,
     startMonth: 0,
-    active: false
+    active: false,
+    startYear: 0,
+    currentMonth: []
   });
 
-  const check = () => {
-    let startDate = state.startDate;
-    let startMonth = state.startMonth;
-    let firstDay: number = new Date(state.year, state.month).getDay();
-    // making copy of days array which holds component of each day in a month
-    let temp = [...state.days];
-    // keeping track of challenge days in each month
-    let challengeDays: number = 0;
-
-    let now = new Date();
-    now.setDate(now.getDay() + 100);
-
-    let date2 = new Date(now);
-    let endDate = date2.getDate();
-    let endMonth = date2.getMonth();
-    if (state.month === startMonth) {
-      for (let i = startDate + firstDay; i < temp.length; i++) {
-        temp.splice(
-          i,
-          1,
-          <div className={calendarStyles.challenge}>{i - firstDay + 1}</div>
-        );
-        challengeDays++;
-      }
-    } else if (state.month === endMonth) {
-      for (let i = firstDay; i < endDate + firstDay; i++) {
-        temp.splice(
-          i,
-          1,
-          <div className={calendarStyles.challenge}>{i - firstDay + 1}</div>
-        );
-        challengeDays++;
-      }
-    } else {
-      for (let i = firstDay; i < temp.length; i++) {
-        temp.splice(
-          i,
-          1,
-          <div className={calendarStyles.challenge}>{i - firstDay + 1}</div>
-        );
-        challengeDays++;
-      }
-    }
-
-    setState({
-      ...state,
-      challengeDays: state.challengeDays + challengeDays,
-      days: temp,
-      active: true
-    });
-  };
-
   useEffect(() => {
-    if (state.active && state.challengeDays < 100) {
-      console.log(state.challengeDays);
-      check();
-    }
-
-    return () => {
-      console.log(state.challengeDays);
-    };
-  }, [state.month]);
+    console.log("year change");
+    getAllMonthsInYear(state.year);
+  }, [state.year]);
 
   useEffect(() => {
     let month = new Date().getMonth();
     let year = new Date().getFullYear();
-    let today = new Date().getDay();
+    let today = new Date().getDate();
+    let days = getAllMonthsInYear(year);
+    let currentMonth = days.find(day => day[month])!;
     setState({
-      days: getArrayOfDayComponent(year, month, today),
-      today: today,
-      month: month,
-      year: year,
-      monthName: getMonthName(month),
-      challengeDays: state.challengeDays,
+      days,
+      month,
+      year,
+      today,
+      challengeDays: 100,
       startDate: 4,
-      startMonth: month,
-      active: false
+      startMonth: 0,
+      active: false,
+      startYear: 0,
+      currentMonth
     });
   }, []);
+
+  const getDaysinMonth = (month: number, year: number): number => {
+    return 32 - new Date(year, month, 32).getDate();
+  };
+
+  const daysOfWeek = (): string[] => {
+    return [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ];
+  };
 
   const getMonthName = (month: number) => {
     let months = [
@@ -187,38 +89,152 @@ const Calendar: React.FC = () => {
     return months[month];
   };
 
+  const getAllMonthsInYear = (
+    year: number
+  ): Array<Array<{ id: number; selected: boolean }>> => {
+    let arrayOfYear = [];
+
+    for (let i = 0; i < 12; i++) {
+      let monthArr = [];
+      let totalDays = getDaysinMonth(i, year);
+      let firstDay: number = new Date(year, i).getDay();
+      for (let j = 1 - firstDay; j < totalDays + 1; j++) {
+        if (j < 1) {
+          monthArr.push({ id: 0, selected: false });
+        } else {
+          monthArr.push({ id: j, selected: false });
+        }
+      }
+
+      arrayOfYear.push(monthArr);
+    }
+
+    return arrayOfYear;
+  };
+
+  const startChallenge = () => {
+    let month = new Date().getMonth();
+    let year = new Date().getFullYear();
+    let day = new Date().getDate();
+    let firstDay: number = new Date(year, month).getDay();
+
+    let tempDays = [...state.days];
+    let challengeDays = 0;
+
+    for (let i = 0; i < tempDays.length; i++) {
+      if (i === month) {
+        for (
+          let j = state.startDate + firstDay - 1;
+          j < tempDays[i].length;
+          j++
+        ) {
+          if (j >= day) {
+            tempDays[i][j].selected = true;
+            challengeDays++;
+          }
+        }
+      } else if (i > month) {
+        for (let j = 0; j < tempDays[i].length; j++) {
+          if (challengeDays === 101) {
+            break;
+          }
+
+          if (tempDays[i][j].id !== 0) {
+            tempDays[i][j].selected = true;
+            challengeDays++;
+          }
+        }
+      }
+    }
+
+    let currentMonth = getCurrentMonthArray(state.month);
+    console.log(challengeDays);
+
+    setState({
+      ...state,
+      currentMonth,
+      days: tempDays,
+      challengeDays,
+      startMonth: month,
+      startDate: day,
+      startYear: year
+    });
+  };
+
+  const getCurrentMonthArray = (
+    month: number
+  ): { id: number; selected: boolean }[] => {
+    return state.days[month];
+  };
+
   const changeMonth = (op: string) => {
     let month = 0;
+    let days: Array<Array<{ id: number; selected: boolean }>> = [];
     if (op === "+") {
       month = state.month + 1;
     } else if (op === "-") {
       month = state.month - 1;
     }
-    let days = getArrayOfDayComponent(state.year, month, state.today);
     let year = state.year;
     if (month === 12 && op === "+") {
       year = state.year + 1;
       month = 0;
+      days = getAllMonthsInYear(year);
     } else if (month < 0 && op === "-") {
       year = state.year - 1;
       month = 11;
+      days = getAllMonthsInYear(year);
     }
-    setState({
-      ...state,
-      days,
-      month: month,
-      year,
-      monthName: getMonthName(month)
-    });
+
+    let currentMonth = getCurrentMonthArray(month);
+
+    if (days.length !== 0) {
+      setState({
+        ...state,
+        days,
+        currentMonth,
+        year,
+        month
+      });
+    } else {
+      setState({
+        ...state,
+        currentMonth,
+        year,
+        month
+      });
+    }
   };
 
   return (
     <>
-      <button onClick={() => check()}>start challenge</button>
-      <div>{state.monthName}</div>
+      <div>{getMonthName(state.month)}</div>
       <div>{state.year}</div>
-      <div className={calendarStyles.calendar}>{getDaysOfWeek()}</div>
-      <div className={calendarStyles.days}>{state.days}</div>
+      <button onClick={() => startChallenge()}>start challenge</button>
+      <div className={calendarStyles.calendar}>
+        {daysOfWeek().map(day => {
+          return <div>{day}</div>;
+        })}
+      </div>
+      <div className={calendarStyles.days}>
+        {state.currentMonth.map(day => {
+          let month = new Date().getMonth();
+          let year = new Date().getFullYear();
+          if (day.id === 0) {
+            return <div></div>;
+          } else if (
+            day.id === state.today &&
+            state.month === month &&
+            state.year === year
+          ) {
+            return <div className={calendarStyles.active}>{day.id}</div>;
+          } else if (day.selected === true && state.startYear === state.year) {
+            return <div className={calendarStyles.challenge}>{day.id}</div>;
+          } else {
+            return <div>{day.id}</div>;
+          }
+        })}
+      </div>
       <button onClick={() => changeMonth("-")}>prev</button>
       <button onClick={() => changeMonth("+")}>next</button>
     </>
