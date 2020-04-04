@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { FaUserAlt } from "react-icons/fa";
+import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 
 import calendarStyles from "../styles/calendar.module.css";
 
@@ -29,10 +31,10 @@ const Calendar = () => {
     currentMonth: []
   });
 
-  useEffect(() => {
-    console.log("year change");
-    getAllMonthsInYear(state.year);
-  }, [state.year]);
+  // useEffect(() => {
+  //   console.log("year change");
+  //   getAllMonthsInYear(state.year);
+  // }, [state.year]);
 
   useEffect(() => {
     let month = new Date().getMonth();
@@ -206,37 +208,132 @@ const Calendar = () => {
     }
   };
 
+  const handleEvent = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ): void => {
+    let month = Number(e.currentTarget.getAttribute("data-id"));
+    let currentMonth = getCurrentMonthArray(month);
+    setState({
+      ...state,
+      currentMonth,
+      month
+    });
+  };
+
   return (
     <>
-      <div>{getMonthName(state.month)}</div>
-      <div>{state.year}</div>
-      <button onClick={() => startChallenge()}>start challenge</button>
-      <div className={calendarStyles.calendar}>
-        {daysOfWeek().map(day => {
-          return <div>{day}</div>;
-        })}
-      </div>
-      <div className={calendarStyles.days}>
-        {state.currentMonth.map(day => {
-          let month = new Date().getMonth();
-          let year = new Date().getFullYear();
-          if (day.id === 0) {
-            return <div></div>;
-          } else if (
-            day.id === state.today &&
-            state.month === month &&
-            state.year === year
-          ) {
-            return <div className={calendarStyles.active}>{day.id}</div>;
-          } else if (day.selected === true && state.startYear === state.year) {
-            return <div className={calendarStyles.challenge}>{day.id}</div>;
-          } else {
-            return <div>{day.id}</div>;
-          }
-        })}
-      </div>
-      <button onClick={() => changeMonth("-")}>prev</button>
-      <button onClick={() => changeMonth("+")}>next</button>
+      <section className={calendarStyles.container}>
+        <div className={calendarStyles.calendarMonthsInfo}>
+          <div className={calendarStyles.calendarSideProfileInfo}>
+            <div className={calendarStyles.calendarSideProfile}>
+              <FaUserAlt className={calendarStyles.profileIcon} />
+            </div>
+            <p>Name</p>
+          </div>
+          <div className={calendarStyles.calendarSideMonthInfo}>
+            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(i => {
+              if (i === state.month) {
+                return (
+                  <div
+                    className={`${calendarStyles.calendarSideMonths} ${calendarStyles.activeMonth}`}
+                    data-id={i}
+                    onClick={e => handleEvent(e)}
+                  >
+                    <p>{getMonthName(i)}</p>
+                  </div>
+                );
+              } else {
+                return (
+                  <div
+                    className={calendarStyles.calendarSideMonths}
+                    data-id={i}
+                    onClick={e => handleEvent(e)}
+                  >
+                    <p>{getMonthName(i)}</p>
+                  </div>
+                );
+              }
+            })}
+          </div>
+        </div>
+        <div className={calendarStyles.calendar}>
+          <div>
+            <button
+              className={calendarStyles.startChallengeBtn}
+              onClick={() => startChallenge()}
+            >
+              start challenge
+            </button>
+          </div>
+          <div className={calendarStyles.calendarTitles}>
+            <div className={calendarStyles.calendarHeader}>
+              <p style={{ fontSize: 23 }}>Code Calendar</p>
+            </div>
+            <div className={calendarStyles.calendarMonth}>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <IoIosArrowBack
+                  style={{ cursor: "pointer" }}
+                  size={25}
+                  onClick={() => changeMonth("-")}
+                />
+                <p style={{ fontSize: 18, margin: "0.5rem", width: "5rem" }}>
+                  {getMonthName(state.month)}
+                </p>
+                <IoIosArrowForward
+                  style={{ cursor: "pointer" }}
+                  size={25}
+                  onClick={() => changeMonth("+")}
+                />
+              </div>
+              <p style={{ fontSize: 16 }}>{state.year}</p>
+            </div>
+          </div>
+          <div className={calendarStyles.weekDays}>
+            {daysOfWeek().map(day => {
+              return <div style={{ padding: "1rem" }}>{day}</div>;
+            })}
+          </div>
+          <div className={calendarStyles.days}>
+            {state.currentMonth.map(day => {
+              let month = new Date().getMonth();
+              let year = new Date().getFullYear();
+              if (day.id === 0) {
+                return <div className={calendarStyles.day}></div>;
+              } else if (
+                day.id === state.today &&
+                state.month === month &&
+                state.year === year
+              ) {
+                return (
+                  <div
+                    className={`${calendarStyles.activeDay} ${calendarStyles.day}`}
+                  >
+                    <p style={{ fontSize: 16 }}>{day.id}</p>
+                  </div>
+                );
+              } else if (
+                day.selected === true &&
+                state.startYear === state.year
+              ) {
+                return (
+                  <div
+                    className={`${calendarStyles.challenge} ${calendarStyles.day}`}
+                  >
+                    <p style={{ fontSize: 16 }}>{day.id}</p>
+                  </div>
+                );
+              } else {
+                return (
+                  <div className={calendarStyles.day}>
+                    {" "}
+                    <p style={{ fontSize: 16 }}>{day.id}</p>
+                  </div>
+                );
+              }
+            })}
+          </div>
+        </div>
+      </section>
     </>
   );
 };
