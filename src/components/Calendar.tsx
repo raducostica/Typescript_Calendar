@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { FaUserAlt } from "react-icons/fa";
-import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 
 import calendarStyles from "../styles/calendar.module.css";
+
+// components
+import CalendarComp from "./calendarComponents/CalendarComp";
+import CalendarTitle from "./calendarComponents/CalendarTitle";
+import CalendarUserProfile from "./calendarComponents/CalendarUserProfile";
+import CalendarSideMonths from "./calendarComponents/CalendarSideMonths";
 
 interface Calendar {
   days: Array<Array<{ id: number; selected: boolean }>>;
@@ -28,20 +32,15 @@ const Calendar = () => {
     startMonth: 0,
     active: false,
     startYear: 0,
-    currentMonth: []
+    currentMonth: [],
   });
-
-  // useEffect(() => {
-  //   console.log("year change");
-  //   getAllMonthsInYear(state.year);
-  // }, [state.year]);
 
   useEffect(() => {
     let month = new Date().getMonth();
     let year = new Date().getFullYear();
     let today = new Date().getDate();
     let days = getAllMonthsInYear(year);
-    let currentMonth = days.find(day => day[month])!;
+    let currentMonth = days.find((day) => day[month])!;
     setState({
       days,
       month,
@@ -52,7 +51,7 @@ const Calendar = () => {
       startMonth: 0,
       active: false,
       startYear: 0,
-      currentMonth
+      currentMonth,
     });
   }, []);
 
@@ -68,7 +67,7 @@ const Calendar = () => {
       "Wednesday",
       "Thursday",
       "Friday",
-      "Saturday"
+      "Saturday",
     ];
   };
 
@@ -85,7 +84,7 @@ const Calendar = () => {
       "September",
       "October",
       "November",
-      "December"
+      "December",
     ];
 
     return months[month];
@@ -125,11 +124,7 @@ const Calendar = () => {
 
     for (let i = 0; i < tempDays.length; i++) {
       if (i === month) {
-        for (
-          let j = state.startDate + firstDay - 1;
-          j < tempDays[i].length;
-          j++
-        ) {
+        for (let j = state.startDate + firstDay; j < tempDays[i].length; j++) {
           if (j >= day) {
             tempDays[i][j].selected = true;
             challengeDays++;
@@ -159,7 +154,7 @@ const Calendar = () => {
       challengeDays,
       startMonth: month,
       startDate: day,
-      startYear: year
+      startYear: year,
     });
   };
 
@@ -196,14 +191,14 @@ const Calendar = () => {
         days,
         currentMonth,
         year,
-        month
+        month,
       });
     } else {
       setState({
         ...state,
         currentMonth,
         year,
-        month
+        month,
       });
     }
   };
@@ -216,7 +211,7 @@ const Calendar = () => {
     setState({
       ...state,
       currentMonth,
-      month
+      month,
     });
   };
 
@@ -224,114 +219,29 @@ const Calendar = () => {
     <>
       <section className={calendarStyles.container}>
         <div className={calendarStyles.calendarMonthsInfo}>
-          <div className={calendarStyles.calendarSideProfileInfo}>
-            <div className={calendarStyles.calendarSideProfile}>
-              <FaUserAlt className={calendarStyles.profileIcon} />
-            </div>
-            <p>Name</p>
-          </div>
-          <div className={calendarStyles.calendarSideMonthInfo}>
-            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(i => {
-              if (i === state.month) {
-                return (
-                  <div
-                    className={`${calendarStyles.calendarSideMonths} ${calendarStyles.activeMonth}`}
-                    data-id={i}
-                    onClick={e => handleEvent(e)}
-                  >
-                    <p>{getMonthName(i)}</p>
-                  </div>
-                );
-              } else {
-                return (
-                  <div
-                    className={calendarStyles.calendarSideMonths}
-                    data-id={i}
-                    onClick={e => handleEvent(e)}
-                  >
-                    <p>{getMonthName(i)}</p>
-                  </div>
-                );
-              }
-            })}
-          </div>
+          <CalendarUserProfile />
+          <CalendarSideMonths
+            stateMonth={state.month}
+            getMonthName={getMonthName}
+            handleEvent={handleEvent}
+          />
         </div>
         <div className={calendarStyles.calendar}>
-          <div>
-            <button
-              className={calendarStyles.startChallengeBtn}
-              onClick={() => startChallenge()}
-            >
-              start challenge
-            </button>
-          </div>
-          <div className={calendarStyles.calendarTitles}>
-            <div className={calendarStyles.calendarHeader}>
-              <p style={{ fontSize: 23 }}>Code Calendar</p>
-            </div>
-            <div className={calendarStyles.calendarMonth}>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <IoIosArrowBack
-                  style={{ cursor: "pointer" }}
-                  size={25}
-                  onClick={() => changeMonth("-")}
-                />
-                <p style={{ fontSize: 18, margin: "0.5rem", width: "5rem" }}>
-                  {getMonthName(state.month)}
-                </p>
-                <IoIosArrowForward
-                  style={{ cursor: "pointer" }}
-                  size={25}
-                  onClick={() => changeMonth("+")}
-                />
-              </div>
-              <p style={{ fontSize: 16 }}>{state.year}</p>
-            </div>
-          </div>
-          <div className={calendarStyles.weekDays}>
-            {daysOfWeek().map(day => {
-              return <div style={{ padding: "1rem" }}>{day}</div>;
-            })}
-          </div>
-          <div className={calendarStyles.days}>
-            {state.currentMonth.map(day => {
-              let month = new Date().getMonth();
-              let year = new Date().getFullYear();
-              if (day.id === 0) {
-                return <div className={calendarStyles.day}></div>;
-              } else if (
-                day.id === state.today &&
-                state.month === month &&
-                state.year === year
-              ) {
-                return (
-                  <div
-                    className={`${calendarStyles.activeDay} ${calendarStyles.day}`}
-                  >
-                    <p style={{ fontSize: 16 }}>{day.id}</p>
-                  </div>
-                );
-              } else if (
-                day.selected === true &&
-                state.startYear === state.year
-              ) {
-                return (
-                  <div
-                    className={`${calendarStyles.challenge} ${calendarStyles.day}`}
-                  >
-                    <p style={{ fontSize: 16 }}>{day.id}</p>
-                  </div>
-                );
-              } else {
-                return (
-                  <div className={calendarStyles.day}>
-                    {" "}
-                    <p style={{ fontSize: 16 }}>{day.id}</p>
-                  </div>
-                );
-              }
-            })}
-          </div>
+          <CalendarTitle
+            startChallenge={startChallenge}
+            changeMonth={changeMonth}
+            getMonthName={getMonthName}
+            stateMonth={state.month}
+            stateYear={state.year}
+          />
+          <CalendarComp
+            stateYear={state.year}
+            daysOfWeek={daysOfWeek}
+            currentMonth={state.currentMonth}
+            stateToday={state.today}
+            stateMonth={state.month}
+            startYear={state.startYear}
+          />
         </div>
       </section>
     </>

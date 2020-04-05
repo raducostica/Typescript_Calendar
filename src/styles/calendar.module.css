@@ -43,7 +43,7 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(6, 1fr);
-  height: 70vh;
+  height: 75vh;
 }
 
 .day {
@@ -94,6 +94,7 @@
   width: 100%;
   flex: 3;
   display: flex;
+  padding: 0.5rem 0;
   justify-content: center;
   flex-direction: column;
 }

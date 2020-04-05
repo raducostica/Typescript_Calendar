@@ -1,0 +1,33 @@
+.navbar {
+  background: #fff;
+  box-shadow: 0 -3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  width: 100%;
+  height: 5rem;
+}
+
+.navContainer {
+  width: 70%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  margin: 0 auto;
+  justify-content: space-between;
+}
+
+.navContainer div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.navContainer h2 {
+  font-family: "Monoton", cursive;
+  color: #000;
+  cursor: default;
+}
+
+.navContainer div p {
+  margin-left: 0.25rem;
+  font-size: 20;
+  cursor: default;
+}

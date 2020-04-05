@@ -1,0 +1,14 @@
+@import url("https://fonts.googleapis.com/css2?family=Lato&family=Monoton&display=swap");
+
+/* font-family: 'Lato', sans-serif;
+font-family: 'Monoton', cursive; */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Lato", sans-serif;
+}
