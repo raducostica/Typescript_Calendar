@@ -12,3 +12,13 @@ font-family: 'Monoton', cursive; */
 body {
   font-family: "Lato", sans-serif;
 }
+
+li {
+  text-decoration: none;
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  color: #000;
+}

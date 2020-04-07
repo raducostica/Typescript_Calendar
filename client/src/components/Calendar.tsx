@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Layout from "./Layout";
 
 import calendarStyles from "../styles/calendar.module.css";
 
@@ -47,7 +48,7 @@ const Calendar = () => {
       year,
       today,
       challengeDays: 100,
-      startDate: 4,
+      startDate: 0,
       startMonth: 0,
       active: false,
       startYear: 0,
@@ -124,7 +125,7 @@ const Calendar = () => {
 
     for (let i = 0; i < tempDays.length; i++) {
       if (i === month) {
-        for (let j = state.startDate + firstDay; j < tempDays[i].length; j++) {
+        for (let j = day + firstDay; j < tempDays[i].length; j++) {
           if (j >= day) {
             tempDays[i][j].selected = true;
             challengeDays++;
@@ -216,7 +217,7 @@ const Calendar = () => {
   };
 
   return (
-    <>
+    <Layout>
       <section className={calendarStyles.container}>
         <div className={calendarStyles.calendarMonthsInfo}>
           <CalendarUserProfile />
@@ -244,7 +245,7 @@ const Calendar = () => {
           />
         </div>
       </section>
-    </>
+    </Layout>
   );
 };
 

@@ -31,3 +31,14 @@
   font-size: 20;
   cursor: default;
 }
+
+.navlinks {
+  display: flex;
+  align-items: center;
+}
+
+.navlinks li {
+  padding: 0.5rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+}

@@ -20,6 +20,7 @@ const CalendarSideMonths: React.FC<Props> = ({
           if (i === stateMonth) {
             return (
               <div
+                key={i}
                 className={`${calendarStyles.calendarSideMonths} ${calendarStyles.activeMonth}`}
                 data-id={i}
                 onClick={(e) => handleEvent(e)}
@@ -30,6 +31,7 @@ const CalendarSideMonths: React.FC<Props> = ({
           } else {
             return (
               <div
+                key={i}
                 className={calendarStyles.calendarSideMonths}
                 data-id={i}
                 onClick={(e) => handleEvent(e)}

@@ -22,16 +22,20 @@ const CalendarComp: React.FC<Props> = ({
   return (
     <>
       <div className={calendarStyles.weekDays}>
-        {daysOfWeek().map((day) => {
-          return <div style={{ padding: "1rem" }}>{day}</div>;
+        {daysOfWeek().map((day, i) => {
+          return (
+            <div key={i} style={{ padding: "1rem" }}>
+              {day}
+            </div>
+          );
         })}
       </div>
       <div className={calendarStyles.days}>
-        {currentMonth.map((day) => {
+        {currentMonth.map((day, i) => {
           let month = new Date().getMonth();
           let year = new Date().getFullYear();
           if (day.id === 0) {
-            return <div className={calendarStyles.day}></div>;
+            return <div key={i} className={calendarStyles.day}></div>;
           } else if (
             day.id === stateToday &&
             stateMonth === month &&
@@ -39,6 +43,7 @@ const CalendarComp: React.FC<Props> = ({
           ) {
             return (
               <div
+                key={i}
                 className={`${calendarStyles.activeDay} ${calendarStyles.day}`}
               >
                 <p style={{ fontSize: 16 }}>{day.id}</p>
@@ -47,6 +52,7 @@ const CalendarComp: React.FC<Props> = ({
           } else if (day.selected === true && startYear === stateYear) {
             return (
               <div
+                key={i}
                 className={`${calendarStyles.challenge} ${calendarStyles.day}`}
               >
                 <p style={{ fontSize: 16 }}>{day.id}</p>
@@ -54,8 +60,7 @@ const CalendarComp: React.FC<Props> = ({
             );
           } else {
             return (
-              <div className={calendarStyles.day}>
-                {" "}
+              <div key={i} className={calendarStyles.day}>
                 <p style={{ fontSize: 16 }}>{day.id}</p>
               </div>
             );

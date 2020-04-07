@@ -1,25 +1,87 @@
 import React, { createContext, useReducer } from "react";
 import axios from "axios";
+import setAuthToken from "../utils/setAuthToken";
 
-import { User, Auth, reducer } from "./AuthReducer";
+interface IState {
+  token: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  user: {
+    email: string;
+    username: string;
+    github_user: string | null;
+    points: number;
+    challStart: string | null;
+  };
+}
 
-export const AuthContext = createContext<any>(null);
+interface IAction {
+  type: string;
+  payload: any;
+}
+
+const initialState: IState = {
+  token: localStorage.getItem("token"),
+  isAuthenticated: false,
+  isLoading: true,
+  error: "",
+  user: {
+    email: "",
+    username: "",
+    github_user: "",
+    points: 0,
+    challStart: "",
+  },
+};
+export const AuthContext = createContext<IState | any>(initialState);
+
+const reducer = (state: IState, action: IAction) => {
+  switch (action.type) {
+    case "SIGN_IN":
+    case "REGISTER":
+      localStorage.setItem("token", action.payload);
+      return {
+        ...state,
+        token: action.payload,
+        isAuthenticated: true,
+        isLoading: false,
+      };
+    case "LOAD_USER":
+      return {
+        ...state,
+        isAuthenticated: true,
+        isLoading: false,
+        user: action.payload,
+      };
+    case "LOGOUT":
+      localStorage.clear();
+      return {
+        ...state,
+        token: null,
+        isAuthenticated: false,
+        isLoading: true,
+        user: {},
+      };
+    default:
+      return state;
+  }
+};
 
 const AuthProvider: React.FC = ({ children }) => {
-  const initialState: Auth = {
-    token: "",
-    isAuthenticated: false,
-    loading: true,
-    error: "",
-    user: {
-      email: "",
-      username: "",
-      github_user: null,
-      points: 0,
-      start_challenge: "",
-    },
-  };
   const [state, dispatch] = useReducer(reducer, initialState);
+  const loadUser = async () => {
+    if (localStorage.token) {
+      setAuthToken(localStorage.token);
+    }
+    try {
+      const res = await axios.get("/api/users");
+
+      dispatch({ type: "LOAD_USER", payload: res.data[0] });
+    } catch (error) {
+      return console.log(error);
+    }
+  };
 
   const login = async (data: { email: string; password: string }) => {
     const config = {
@@ -30,8 +92,8 @@ const AuthProvider: React.FC = ({ children }) => {
     try {
       const res = await axios.post("/api/auth", data, config);
 
-      console.log(res.data);
-      dispatch({ type: "SIGN_IN", token: res.data });
+      console.log(state.isAuthenticated);
+      dispatch({ type: "SIGN_IN", payload: res.data.token });
     } catch (error) {
       console.log(error);
     }
@@ -51,10 +113,14 @@ const AuthProvider: React.FC = ({ children }) => {
     try {
       const res = await axios.post("/api/users", data, config);
 
-      dispatch({ type: "REGISTER", token: res.data });
+      dispatch({ type: "REGISTER", payload: res.data });
     } catch (error) {
       return console.log(error);
     }
+  };
+
+  const logout = async () => {
+    dispatch({ type: "LOGOUT", payload: "" });
   };
 
   const startChallenge = async (data: { date: string }) => {
@@ -66,13 +132,23 @@ const AuthProvider: React.FC = ({ children }) => {
     try {
       const res = await axios.post("/api/users/start", data, config);
 
-      dispatch({ type: "START_CHALLENGE", date: data.date });
+      dispatch({ type: "START_CHALLENGE", payload: data.date });
     } catch (error) {
       return console.log(error);
     }
   };
   return (
-    <AuthContext.Provider value={{ login, register, startChallenge }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated: state.isAuthenticated,
+        isLoading: state.isLoading,
+        login,
+        loadUser,
+        startChallenge,
+        register,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

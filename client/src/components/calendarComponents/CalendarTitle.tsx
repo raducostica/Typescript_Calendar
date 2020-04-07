@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useContext } from "react";
 import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 
 import calendarStyles from "../../styles/calendar.module.css";
+import { GiSevenPointedStar } from "react-icons/gi";
 
 interface Props {
   startChallenge: () => void;
@@ -20,13 +21,23 @@ const CalendarTitle: React.FC<Props> = ({
 }) => {
   return (
     <>
-      <div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <button
           className={calendarStyles.startChallengeBtn}
           onClick={() => startChallenge()}
         >
           start challenge
         </button>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <GiSevenPointedStar size={30} />
+          <p style={{ paddingLeft: "0.5rem" }}>Points: 0</p>
+        </div>
       </div>
       <div className={calendarStyles.calendarTitles}>
         <div className={calendarStyles.calendarHeader}>
