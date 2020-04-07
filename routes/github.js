@@ -16,6 +16,7 @@ const getCommits = async (username) => {
     if (res.data[i].type === "PushEvent") {
       const date = new Date(res.data[i].created_at);
       commitData.push({
+        eventId: res.data[i].id,
         day: date.getDate(),
         month: date.getMonth(),
         year: date.getFullYear(),
@@ -39,11 +40,11 @@ router.post("/", authMiddleware, async (req, res) => {
         data[i].month >= parseInt(month) &&
         data[i].year >= parseInt(year)
       ) {
-        console.log(data[i]);
         const query = await pool.query(
-          "INSERT INTO github(activity_date, commits, user_id) VALUES($1, $2, $3)",
+          "INSERT INTO github(activity_date,event_id,commits, user_id) VALUES($1, $2, $3, $4)",
           [
             `'${data[i].day}-${data[i].month}-${data[i].year}'`,
+            data[i].eventId,
             data[i].commits,
             req.user.id,
           ]

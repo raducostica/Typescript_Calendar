@@ -4,17 +4,39 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const validator = require("validator");
 
+const authMiddleware = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   try {
-    const response = await pool.query("SELECT * FROM users ORDER BY id");
-    res.send(response.rows);
+    const response = await pool.query(
+      "SELECT email, username, github_user, points, chall_start FROM users WHERE uid=$1",
+      [req.user.id]
+    );
+    res.status(201).json(response.rows);
   } catch (error) {
     res.status(401).send(error);
   }
 });
 
+// BEGIN CHALLENGE
+router.post("/start", authMiddleware, async (req, res) => {
+  const { date, userID } = req.body;
+
+  try {
+    const response = await pool.query(
+      "UPDATE users SET chall_start=$1 uid=$2",
+      [date, userID]
+    );
+
+    return res.status(201).json({ msg: "success" });
+  } catch (error) {
+    return console.log(error);
+  }
+});
+
+// REGISTER USER
 router.post("/", async (req, res) => {
   const { email, username, password, github_user } = req.body;
 
