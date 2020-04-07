@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Layout from "./Layout";
 
 import calendarStyles from "../styles/calendar.module.css";
@@ -8,6 +8,7 @@ import CalendarComp from "./calendarComponents/CalendarComp";
 import CalendarTitle from "./calendarComponents/CalendarTitle";
 import CalendarUserProfile from "./calendarComponents/CalendarUserProfile";
 import CalendarSideMonths from "./calendarComponents/CalendarSideMonths";
+import { AuthContext } from "../context/AuthContext";
 
 interface Calendar {
   days: Array<Array<{ id: number; selected: boolean }>>;
@@ -23,6 +24,7 @@ interface Calendar {
 }
 
 const Calendar = () => {
+  const { user, updateStartChallenge } = useContext(AuthContext);
   const [state, setState] = useState<Calendar>({
     days: [],
     month: 0,
@@ -41,20 +43,84 @@ const Calendar = () => {
     let year = new Date().getFullYear();
     let today = new Date().getDate();
     let days = getAllMonthsInYear(year);
+    let startDate = 0;
+    let startMonth = 0;
+    let startYear = 0;
+    let challengeDays = 0;
+    let active = false;
+
     let currentMonth = days.find((day) => day[month])!;
+
     setState({
       days,
       month,
       year,
       today,
-      challengeDays: 100,
-      startDate: 0,
-      startMonth: 0,
-      active: false,
-      startYear: 0,
+      challengeDays,
+      startDate,
+      startMonth,
+      active,
+      startYear,
       currentMonth,
     });
   }, []);
+
+  useEffect(() => {
+    if (user.chall_start) {
+      // get date user started challenege
+      let date = new Date(user.chall_start);
+      // starting day
+      let startDate = date.getDate() - 1;
+      // starting month
+      let startMonth = date.getMonth() + 1;
+      // starting year
+      let startYear = date.getFullYear();
+      // keep track of how many days we loop over
+      let challengeDays = 0;
+
+      // get first day of the month
+      let firstDay: number = new Date(state.year, state.month).getDay();
+
+      // copy array which holds the months and days for the year
+      let tempDays = [...state.days];
+      console.log(tempDays);
+
+      for (let i = 0; i < tempDays.length; i++) {
+        if (i === startMonth) {
+          for (let j = startDate + firstDay; j < tempDays[i].length; j++) {
+            if (j >= startDate) {
+              tempDays[i][j].selected = true;
+              challengeDays++;
+            }
+          }
+        } else if (i > startMonth) {
+          for (let j = 0; j < tempDays[i].length; j++) {
+            if (challengeDays === 101) {
+              break;
+            }
+
+            if (tempDays[i][j].id !== 0) {
+              tempDays[i][j].selected = true;
+              challengeDays++;
+            }
+          }
+        }
+      }
+
+      let currentMonth = getCurrentMonthArray(state.month);
+
+      setState({
+        ...state,
+        startDate,
+        startMonth,
+        startYear,
+        days: tempDays,
+        currentMonth,
+        challengeDays,
+        active: true,
+      });
+    }
+  }, [user.chall_start]);
 
   const getDaysinMonth = (month: number, year: number): number => {
     return 32 - new Date(year, month, 32).getDate();
@@ -122,6 +188,8 @@ const Calendar = () => {
 
     let tempDays = [...state.days];
     let challengeDays = 0;
+
+    updateStartChallenge({ date: `${month}-${day}-${year}` });
 
     for (let i = 0; i < tempDays.length; i++) {
       if (i === month) {

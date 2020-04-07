@@ -1,0 +1,100 @@
+.auth {
+  padding: 1rem 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.authContainer {
+  padding: 1rem 2rem;
+}
+
+.authContainer form {
+  padding: 1rem 0;
+}
+
+.authTitle {
+  padding: 0.5rem 0;
+}
+
+.authTitle h2 {
+  font-size: 2.5rem;
+  margin: 0.5rem 0;
+}
+
+.authTitle p {
+  font-size: 1.2rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  position: relative;
+  margin: 0.5rem 0;
+}
+
+.inputGroupReg {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  position: relative;
+}
+
+.icon {
+  position: absolute;
+  right: 0;
+  top: 0;
+  transform: translate(-50%, 70%);
+}
+
+.inputGroup input,
+.inputGroupReg input {
+  outline: none;
+  border: none;
+  padding: 0.4rem 0.6rem;
+  background: transparent;
+  border-bottom: 1px solid #000;
+  color: #000;
+  font-size: 1.1rem;
+  margin: 1rem 0;
+}
+
+.inputGroup input::placeholder {
+  color: #000;
+}
+
+.inputGroup input:-ms-input-placeholder {
+  color: #000;
+}
+
+.loginBtn {
+  width: 30%;
+  background: #fff;
+  border-radius: 1.5rem;
+  margin-top: 1.2rem;
+  box-shadow: 0 0px 6px rgba(0, 0, 0, 0.5), 0 7px 6px rgba(0, 0, 0, 0.5);
+}
+
+.loginBtn button {
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  height: 100%;
+  padding: 0.7rem;
+  font-size: 1.2rem;
+}
+
+.signUpBtn {
+  border: none;
+  outline: none;
+  width: 20%;
+  padding: 0.4rem;
+  background: #fff;
+  border-radius: 1.5rem;
+  margin: 1.3rem 0.5rem;
+  font-weight: 700;
+  box-shadow: 0 0px 6px rgba(0, 0, 0, 0.5), 0 7px 6px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}

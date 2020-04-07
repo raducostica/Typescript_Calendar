@@ -3,6 +3,7 @@ import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 
 import calendarStyles from "../../styles/calendar.module.css";
 import { GiSevenPointedStar } from "react-icons/gi";
+import { AuthContext } from "../../context/AuthContext";
 
 interface Props {
   startChallenge: () => void;
@@ -19,6 +20,7 @@ const CalendarTitle: React.FC<Props> = ({
   stateMonth,
   stateYear,
 }) => {
+  const { user } = useContext(AuthContext);
   return (
     <>
       <div
@@ -28,12 +30,18 @@ const CalendarTitle: React.FC<Props> = ({
           alignItems: "center",
         }}
       >
-        <button
-          className={calendarStyles.startChallengeBtn}
-          onClick={() => startChallenge()}
-        >
-          start challenge
-        </button>
+        {!user.chall_start ? (
+          <button
+            className={calendarStyles.startChallengeBtn}
+            onClick={() => startChallenge()}
+          >
+            start challenge
+          </button>
+        ) : (
+          <button className={calendarStyles.startChallengeBtn}>
+            Challenge Started
+          </button>
+        )}
         <div style={{ display: "flex", alignItems: "center" }}>
           <GiSevenPointedStar size={30} />
           <p style={{ paddingLeft: "0.5rem" }}>Points: 0</p>

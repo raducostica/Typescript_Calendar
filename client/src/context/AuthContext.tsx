@@ -1,4 +1,4 @@
-import React, { createContext, useReducer } from "react";
+import React, { createContext, useReducer, useEffect } from "react";
 import axios from "axios";
 import setAuthToken from "../utils/setAuthToken";
 
@@ -55,13 +55,19 @@ const reducer = (state: IState, action: IAction) => {
         user: action.payload,
       };
     case "LOGOUT":
-      localStorage.clear();
+      localStorage.removeItem("token");
       return {
         ...state,
         token: null,
         isAuthenticated: false,
-        isLoading: true,
-        user: {},
+        isLoading: false,
+        user: {
+          email: "",
+          username: "",
+          github_user: "",
+          points: 0,
+          chall_Start: "",
+        },
       };
     default:
       return state;
@@ -70,6 +76,11 @@ const reducer = (state: IState, action: IAction) => {
 
 const AuthProvider: React.FC = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    console.log(state.user);
+  }, [state.user]);
+
   const loadUser = async () => {
     if (localStorage.token) {
       setAuthToken(localStorage.token);
@@ -94,6 +105,7 @@ const AuthProvider: React.FC = ({ children }) => {
 
       console.log(state.isAuthenticated);
       dispatch({ type: "SIGN_IN", payload: res.data.token });
+      loadUser();
     } catch (error) {
       console.log(error);
     }
@@ -123,7 +135,7 @@ const AuthProvider: React.FC = ({ children }) => {
     dispatch({ type: "LOGOUT", payload: "" });
   };
 
-  const startChallenge = async (data: { date: string }) => {
+  const updateStartChallenge = async (data: { date: string }) => {
     const config = {
       headers: {
         "Content-Type": "application/json",
@@ -142,9 +154,10 @@ const AuthProvider: React.FC = ({ children }) => {
       value={{
         isAuthenticated: state.isAuthenticated,
         isLoading: state.isLoading,
+        user: state.user,
         login,
         loadUser,
-        startChallenge,
+        updateStartChallenge,
         register,
         logout,
       }}

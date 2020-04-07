@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 
 import { GiSevenPointedStar } from "react-icons/gi";
 
@@ -6,7 +6,11 @@ import navStyles from "../styles/navbar.module.css";
 import { AuthContext } from "../context/AuthContext";
 
 const Navbar = () => {
-  const { logout, isAuthenticated } = useContext(AuthContext);
+  const { logout, isAuthenticated, loadUser } = useContext(AuthContext);
+
+  useEffect(() => {
+    loadUser();
+  }, []);
   return (
     <nav className={navStyles.navbar}>
       <div className={navStyles.navContainer}>
