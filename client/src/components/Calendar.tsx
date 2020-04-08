@@ -24,7 +24,7 @@ interface Calendar {
 }
 
 const Calendar = () => {
-  const { user, updateStartChallenge } = useContext(AuthContext);
+  const { user, updateStartChallenge, updatePoints } = useContext(AuthContext);
   const [state, setState] = useState<Calendar>({
     days: [],
     month: 0,
@@ -39,6 +39,7 @@ const Calendar = () => {
   });
 
   useEffect(() => {
+    updatePoints(user.pointsdate);
     let month = new Date().getMonth();
     let year = new Date().getFullYear();
     let today = new Date().getDate();
@@ -47,7 +48,7 @@ const Calendar = () => {
     let startMonth = 0;
     let startYear = 0;
     let challengeDays = 0;
-    let active = false;
+    let active = true;
 
     let currentMonth = days.find((day) => day[month])!;
 
@@ -66,11 +67,11 @@ const Calendar = () => {
   }, []);
 
   useEffect(() => {
-    if (user.chall_start) {
+    if (user.chall_start && state.active) {
       // get date user started challenege
       let date = new Date(user.chall_start);
       // starting day
-      let startDate = date.getDate() - 1;
+      let startDate = date.getDate();
       // starting month
       let startMonth = date.getMonth() + 1;
       // starting year
@@ -83,7 +84,6 @@ const Calendar = () => {
 
       // copy array which holds the months and days for the year
       let tempDays = [...state.days];
-      console.log(tempDays);
 
       for (let i = 0; i < tempDays.length; i++) {
         if (i === startMonth) {
@@ -120,7 +120,11 @@ const Calendar = () => {
         active: true,
       });
     }
-  }, [user.chall_start]);
+  }, [state.active]);
+
+  useEffect(() => {
+    console.log(state);
+  });
 
   const getDaysinMonth = (month: number, year: number): number => {
     return 32 - new Date(year, month, 32).getDate();

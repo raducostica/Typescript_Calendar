@@ -13,7 +13,7 @@ interface Props {
 }
 
 const Home: React.FC<Props> = (props) => {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, updatePoints } = useContext(AuthContext);
 
   const [active, setActive] = useState(false);
 

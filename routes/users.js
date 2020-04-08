@@ -11,23 +11,23 @@ const router = express.Router();
 router.get("/", authMiddleware, async (req, res) => {
   try {
     const response = await pool.query(
-      "SELECT email, username, github_user, points, chall_start FROM users WHERE uid=$1",
+      "SELECT email, username, github_user, points, chall_start, pointsdate, points FROM users WHERE uid=$1",
       [req.user.id]
     );
-    res.status(201).json(response.rows);
+    return res.status(201).json(response.rows);
   } catch (error) {
-    res.status(401).send(error);
+    return res.status(401).send(error);
   }
 });
 
 // BEGIN CHALLENGE
 router.post("/start", authMiddleware, async (req, res) => {
-  const { date, userID } = req.body;
+  const { date } = req.body;
 
   try {
     const response = await pool.query(
-      "UPDATE users SET chall_start=$1 uid=$2",
-      [date, userID]
+      "UPDATE users SET chall_start=$1 WHERE uid=$2",
+      [date, req.user.id]
     );
 
     return res.status(201).json({ msg: "success" });
@@ -61,11 +61,19 @@ router.post("/", async (req, res) => {
       password: hash,
       github_user,
       joined: new Date().toDateString(),
+      pointsDate: new Date(),
     };
 
     const response = await pool.query(
-      "INSERT INTO users(email, username, password, github_user, joined) VALUES($1, $2, $3, $4, $5) RETURNING uid",
-      [user.email, user.username, user.password, user.github_user, user.joined]
+      "INSERT INTO users(email, username, password, github_user, joined, pointsDate) VALUES($1, $2, $3, $4, $5, $6) RETURNING uid",
+      [
+        user.email,
+        user.username,
+        user.password,
+        user.github_user,
+        user.joined,
+        user.pointsDate,
+      ]
     );
 
     const payload = {
@@ -83,6 +91,21 @@ router.post("/", async (req, res) => {
     });
   } catch (error) {
     return res.status(401).json({ msg: error });
+  }
+});
+
+router.post("/pointsdate", authMiddleware, async (req, res) => {
+  const { date, points } = req.body;
+
+  try {
+    const response = await pool.query(
+      "UPDATE users SET points=$1, pointsDate=$2 WHERE uid=$3",
+      [points, date, req.user.id]
+    );
+
+    res.status(201).json({ msg: "success" });
+  } catch (error) {
+    return res.status(401).json({ msg: "Invalid Credentials" });
   }
 });
 

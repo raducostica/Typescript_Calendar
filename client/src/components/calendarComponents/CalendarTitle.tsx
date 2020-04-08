@@ -44,7 +44,7 @@ const CalendarTitle: React.FC<Props> = ({
         )}
         <div style={{ display: "flex", alignItems: "center" }}>
           <GiSevenPointedStar size={30} />
-          <p style={{ paddingLeft: "0.5rem" }}>Points: 0</p>
+          <p style={{ paddingLeft: "0.5rem" }}>Points: {user.points}</p>
         </div>
       </div>
       <div className={calendarStyles.calendarTitles}>
