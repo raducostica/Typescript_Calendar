@@ -1,7 +1,6 @@
 import React, { createContext, useReducer, useEffect } from "react";
 import axios from "axios";
 import setAuthToken from "../utils/setAuthToken";
-import { userInfo } from "os";
 
 interface IState {
   token: string | null;
@@ -13,8 +12,9 @@ interface IState {
     username: string;
     github_user: string | null;
     points: number;
-    chall_Start: string | null;
+    challstart: string | null;
     pointsdate: string | null;
+    githubdate: string | null;
   };
 }
 
@@ -33,8 +33,9 @@ const initialState: IState = {
     username: "",
     github_user: "",
     points: 0,
-    chall_Start: "",
+    challstart: "",
     pointsdate: "",
+    githubdate: "",
   },
 };
 export const AuthContext = createContext<IState | any>(initialState);
@@ -69,20 +70,27 @@ const reducer = (state: IState, action: IAction) => {
           username: "",
           github_user: "",
           points: 0,
-          chall_Start: "",
+          challstart: "",
           pointsdate: "",
+          githubdate: "",
         },
       };
     case "UPDATE_POINTS":
       return {
         ...state,
         user: {
-          email: state.user.email,
-          username: state.user.username,
-          github_user: state.user.github_user,
-          points: action.payload.points,
-          chall_Start: state.user.chall_Start,
+          ...state.user,
           pointsdate: action.payload.date,
+          points: action.payload.points,
+        },
+      };
+    case "UPDATE_POINTS_GH":
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          points: action.payload.points,
+          githubdate: action.payload.current,
         },
       };
     default:
@@ -93,18 +101,12 @@ const reducer = (state: IState, action: IAction) => {
 const AuthProvider: React.FC = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  useEffect(() => {
-    console.log(state.user);
-  }, [state.user]);
-
   const loadUser = async () => {
     if (localStorage.token) {
       setAuthToken(localStorage.token);
     }
     try {
       const res = await axios.get("/api/users");
-
-      console.log(res);
 
       dispatch({ type: "LOAD_USER", payload: res.data[0] });
     } catch (error) {
@@ -121,7 +123,6 @@ const AuthProvider: React.FC = ({ children }) => {
     try {
       const res = await axios.post("/api/auth", data, config);
 
-      console.log(state.isAuthenticated);
       dispatch({ type: "SIGN_IN", payload: res.data.token });
       loadUser();
     } catch (error) {
@@ -169,6 +170,42 @@ const AuthProvider: React.FC = ({ children }) => {
     }
   };
 
+  const updateGithubPoints = async (date: string) => {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    try {
+      let current = new Date();
+      let lastUpdated = new Date(date);
+      let points = state.user.points;
+
+      if (
+        current.getDate() > lastUpdated.getDate() &&
+        current.getMonth() >= lastUpdated.getMonth() &&
+        current.getFullYear() >= lastUpdated.getFullYear()
+      ) {
+        console.log("true");
+        points = points + 5;
+
+        let data = {
+          github_user: state.user.github_user,
+          day: current.getDate(),
+          month: current.getMonth() + 1,
+          year: current.getFullYear(),
+          points,
+        };
+        const res = await axios.post("/api/commits", data, config);
+
+        dispatch({ type: "UPDATE_POINTS_GH", payload: { current, points } });
+      }
+    } catch (error) {
+      return console.log(error);
+    }
+  };
+
   const updatePoints = async (date: string) => {
     const config = {
       headers: {
@@ -179,17 +216,30 @@ const AuthProvider: React.FC = ({ children }) => {
     let lastUpdated = new Date(date);
     let points = state.user.points;
 
+    console.log(
+      currentDate.getDate(),
+      currentDate.getMonth(),
+      currentDate.getFullYear()
+    );
+    console.log(
+      lastUpdated.getDate(),
+      lastUpdated.getMonth(),
+      lastUpdated.getFullYear()
+    );
+
     if (
       (currentDate.getDate() > lastUpdated.getDate() &&
-        currentDate.getMonth() === lastUpdated.getMonth() &&
-        currentDate.getFullYear() === lastUpdated.getFullYear()) ||
-      (currentDate.getMonth() > lastUpdated.getMonth() &&
+        currentDate.getMonth() >= lastUpdated.getMonth() &&
+        currentDate.getFullYear() >= lastUpdated.getFullYear()) ||
+      (currentDate.getMonth() > lastUpdated.getMonth() + 1 &&
         currentDate.getFullYear() === lastUpdated.getFullYear())
     ) {
       points += 10;
 
       let data = {
-        date: currentDate,
+        date: `${
+          currentDate.getMonth() + 1
+        }-${currentDate.getDate()}-${currentDate.getFullYear()}`,
         points,
       };
 
@@ -211,6 +261,7 @@ const AuthProvider: React.FC = ({ children }) => {
         register,
         logout,
         updatePoints,
+        updateGithubPoints,
       }}
     >
       {children}

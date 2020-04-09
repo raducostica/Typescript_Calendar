@@ -6,50 +6,47 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-const getCommits = async (username) => {
-  let commitData = [];
+const getCommits = async (username, day, month, year) => {
+  let commitsData = [];
   const res = await axios.get(
     `https://api.github.com/users/${username}/events/public`
   );
 
+  if (res.message) {
+    return false;
+  }
+
   for (let i = 0; i < res.data.length; i++) {
     if (res.data[i].type === "PushEvent") {
       const date = new Date(res.data[i].created_at);
-      commitData.push({
-        eventId: res.data[i].id,
-        day: date.getDate(),
-        month: date.getMonth(),
-        year: date.getFullYear(),
-        commits: res.data[i].payload.size,
-      });
+      if (
+        day >= date.getDate() &&
+        month >= date.getMonth() &&
+        year >= date.getFullYear()
+      ) {
+        commitsData.push(true);
+      }
     }
   }
 
-  return commitData;
+  if (commitsData.includes(true)) {
+    return true;
+  }
+
+  return false;
 };
 
 router.post("/", authMiddleware, async (req, res) => {
-  const { github_user, day, month, year } = req.body;
+  const { github_user, day, month, year, points } = req.body;
 
   try {
-    const data = await getCommits(github_user);
+    const data = getCommits(github_user, day, month, year);
 
-    for (let i = 0; i < data.length; i++) {
-      if (
-        data[i].day >= parseInt(day) &&
-        data[i].month >= parseInt(month) &&
-        data[i].year >= parseInt(year)
-      ) {
-        const query = await pool.query(
-          "INSERT INTO github(activity_date,event_id,commits, user_id) VALUES($1, $2, $3, $4)",
-          [
-            `'${data[i].day}-${data[i].month}-${data[i].year}'`,
-            data[i].eventId,
-            data[i].commits,
-            req.user.id,
-          ]
-        );
-      }
+    if (data) {
+      const query = await pool.query(
+        "UPDATE users SET githubdate=$1, points=$2 WHERE uid=$3",
+        [`'${month}-${day}-${year}'`, points, req.user.id]
+      );
     }
 
     return res.status(201).json({ msg: "success" });

@@ -11,7 +11,7 @@ import CalendarSideMonths from "./calendarComponents/CalendarSideMonths";
 import { AuthContext } from "../context/AuthContext";
 
 interface Calendar {
-  days: Array<Array<{ id: number; selected: boolean }>>;
+  days: Array<Array<{ id: number; selected: boolean; completed: boolean }>>;
   year: number;
   month: number;
   today: number;
@@ -20,11 +20,17 @@ interface Calendar {
   startMonth: number;
   startYear: number;
   active: boolean;
-  currentMonth: Array<{ id: number; selected: boolean }>;
+  currentMonth: Array<{ id: number; selected: boolean; completed: boolean }>;
 }
 
 const Calendar = () => {
-  const { user, updateStartChallenge, updatePoints } = useContext(AuthContext);
+  const {
+    user,
+    updateStartChallenge,
+    updatePoints,
+    isLoading,
+    updateGithubPoints,
+  } = useContext(AuthContext);
   const [state, setState] = useState<Calendar>({
     days: [],
     month: 0,
@@ -38,7 +44,33 @@ const Calendar = () => {
     currentMonth: [],
   });
 
+  const getDaysSinceStart = (): number => {
+    let start = new Date(user.challstart);
+    let now = new Date();
+
+    let ms = +now - +start;
+
+    let daysSinceStart = Math.floor(ms / (24 * 60 * 60 * 1000));
+
+    return daysSinceStart;
+  };
+
+  const checkDate = () => {
+    let todayDate = new Date();
+    let githubdate = new Date(user.githubdate);
+
+    if (
+      user.github_user &&
+      todayDate.getDate() > githubdate.getDate() &&
+      todayDate.getMonth() >= githubdate.getMonth() &&
+      todayDate.getFullYear() >= githubdate.getFullYear()
+    ) {
+      updateGithubPoints(user.githubdate);
+    }
+  };
+
   useEffect(() => {
+    console.log(user);
     updatePoints(user.pointsdate);
     let month = new Date().getMonth();
     let year = new Date().getFullYear();
@@ -50,8 +82,77 @@ const Calendar = () => {
     let challengeDays = 0;
     let active = true;
 
-    let currentMonth = days.find((day) => day[month])!;
+    let currentMonth = days[month];
 
+    // console.log(user.challstart);
+    // if (user.challstart) {
+    //   checkDate();
+    //   // get date user started challenege
+    //   let date = new Date(user.challstart);
+    //   // starting day
+    //   startDate = date.getDate() + 1;
+    //   // starting month
+    //   startMonth = date.getMonth();
+    //   // starting year
+    //   startYear = date.getFullYear();
+    //   // keep track of how many days we loop over
+    //   // challengeDays = 0;
+
+    //   // get first day of the month
+    //   let firstDay: number = new Date(state.year, state.month).getDay();
+
+    //   // copy array which holds the months and days for the year
+    //   let tempDays = [...days];
+
+    //   let daysSinceStart = getDaysSinceStart() + startDate + firstDay;
+
+    //   console.log(daysSinceStart);
+
+    //   for (let i = 0; i < tempDays.length; i++) {
+    //     if (i === startMonth) {
+    //       for (let j = startDate + firstDay; j < tempDays[i].length; j++) {
+    //         if (j >= startDate) {
+    //           tempDays[i][j].selected = true;
+    //           challengeDays++;
+    //         }
+
+    //         if (j <= daysSinceStart) {
+    //           tempDays[i][j].completed = true;
+    //         }
+    //       }
+    //     } else if (i > startMonth) {
+    //       for (let j = 0; j < tempDays[i].length; j++) {
+    //         if (challengeDays === 101) {
+    //           break;
+    //         }
+
+    //         if (tempDays[i][j].id !== 0) {
+    //           tempDays[i][j].selected = true;
+    //           challengeDays++;
+    //         }
+
+    //         if (j <= daysSinceStart && tempDays[i][j].id !== 0) {
+    //           tempDays[i][j].completed = true;
+    //         }
+    //       }
+    //     }
+    //   }
+
+    //   currentMonth = tempDays[month];
+
+    //   setState({
+    //     days: tempDays,
+    //     month,
+    //     year,
+    //     today,
+    //     challengeDays,
+    //     startDate,
+    //     startMonth,
+    //     active,
+    //     startYear,
+    //     currentMonth,
+    //   });
+    // } else {
     setState({
       days,
       month,
@@ -64,16 +165,18 @@ const Calendar = () => {
       startYear,
       currentMonth,
     });
+    // }
   }, []);
 
   useEffect(() => {
-    if (user.chall_start && state.active) {
+    if (user.challstart && state.active) {
+      checkDate();
       // get date user started challenege
-      let date = new Date(user.chall_start);
+      let date = new Date(user.challstart);
       // starting day
       let startDate = date.getDate();
       // starting month
-      let startMonth = date.getMonth() + 1;
+      let startMonth = date.getMonth();
       // starting year
       let startYear = date.getFullYear();
       // keep track of how many days we loop over
@@ -85,12 +188,21 @@ const Calendar = () => {
       // copy array which holds the months and days for the year
       let tempDays = [...state.days];
 
+      let daysSinceStart = getDaysSinceStart() + startDate;
+      console.log(getDaysSinceStart());
+
+      console.log(daysSinceStart);
+
       for (let i = 0; i < tempDays.length; i++) {
         if (i === startMonth) {
           for (let j = startDate + firstDay; j < tempDays[i].length; j++) {
             if (j >= startDate) {
               tempDays[i][j].selected = true;
               challengeDays++;
+            }
+
+            if (j <= daysSinceStart) {
+              tempDays[i][j].completed = true;
             }
           }
         } else if (i > startMonth) {
@@ -103,28 +215,27 @@ const Calendar = () => {
               tempDays[i][j].selected = true;
               challengeDays++;
             }
+
+            if (j <= daysSinceStart && tempDays[i][j].id !== 0) {
+              tempDays[i][j].completed = true;
+            }
           }
         }
       }
 
-      let currentMonth = getCurrentMonthArray(state.month);
+      let currentMonth = tempDays[state.month];
 
       setState({
         ...state,
+        days: tempDays,
+        challengeDays,
         startDate,
         startMonth,
         startYear,
-        days: tempDays,
         currentMonth,
-        challengeDays,
-        active: true,
       });
     }
-  }, [state.active]);
-
-  useEffect(() => {
-    console.log(state);
-  });
+  }, [user.challstart, state.active]);
 
   const getDaysinMonth = (month: number, year: number): number => {
     return 32 - new Date(year, month, 32).getDate();
@@ -163,7 +274,7 @@ const Calendar = () => {
 
   const getAllMonthsInYear = (
     year: number
-  ): Array<Array<{ id: number; selected: boolean }>> => {
+  ): Array<Array<{ id: number; selected: boolean; completed: boolean }>> => {
     let arrayOfYear = [];
 
     for (let i = 0; i < 12; i++) {
@@ -172,9 +283,9 @@ const Calendar = () => {
       let firstDay: number = new Date(year, i).getDay();
       for (let j = 1 - firstDay; j < totalDays + 1; j++) {
         if (j < 1) {
-          monthArr.push({ id: 0, selected: false });
+          monthArr.push({ id: 0, selected: false, completed: false });
         } else {
-          monthArr.push({ id: j, selected: false });
+          monthArr.push({ id: j, selected: false, completed: false });
         }
       }
 
@@ -193,7 +304,7 @@ const Calendar = () => {
     let tempDays = [...state.days];
     let challengeDays = 0;
 
-    updateStartChallenge({ date: `${month}-${day}-${year}` });
+    updateStartChallenge({ date: `${month + 1}-${day}-${year}` });
 
     for (let i = 0; i < tempDays.length; i++) {
       if (i === month) {
@@ -233,13 +344,17 @@ const Calendar = () => {
 
   const getCurrentMonthArray = (
     month: number
-  ): { id: number; selected: boolean }[] => {
+  ): { id: number; selected: boolean; completed: boolean }[] => {
     return state.days[month];
   };
 
   const changeMonth = (op: string) => {
     let month = 0;
-    let days: Array<Array<{ id: number; selected: boolean }>> = [];
+    let days: Array<Array<{
+      id: number;
+      selected: boolean;
+      completed: boolean;
+    }>> = [];
     if (op === "+") {
       month = state.month + 1;
     } else if (op === "-") {
@@ -290,33 +405,39 @@ const Calendar = () => {
 
   return (
     <Layout>
-      <section className={calendarStyles.container}>
-        <div className={calendarStyles.calendarMonthsInfo}>
-          <CalendarUserProfile />
-          <CalendarSideMonths
-            stateMonth={state.month}
-            getMonthName={getMonthName}
-            handleEvent={handleEvent}
-          />
-        </div>
-        <div className={calendarStyles.calendar}>
-          <CalendarTitle
-            startChallenge={startChallenge}
-            changeMonth={changeMonth}
-            getMonthName={getMonthName}
-            stateMonth={state.month}
-            stateYear={state.year}
-          />
-          <CalendarComp
-            stateYear={state.year}
-            daysOfWeek={daysOfWeek}
-            currentMonth={state.currentMonth}
-            stateToday={state.today}
-            stateMonth={state.month}
-            startYear={state.startYear}
-          />
-        </div>
-      </section>
+      <>
+        {!isLoading ? (
+          <section className={calendarStyles.container}>
+            <div className={calendarStyles.calendarMonthsInfo}>
+              <CalendarUserProfile />
+              <CalendarSideMonths
+                stateMonth={state.month}
+                getMonthName={getMonthName}
+                handleEvent={handleEvent}
+              />
+            </div>
+            <div className={calendarStyles.calendar}>
+              <CalendarTitle
+                startChallenge={startChallenge}
+                changeMonth={changeMonth}
+                getMonthName={getMonthName}
+                stateMonth={state.month}
+                stateYear={state.year}
+              />
+              <CalendarComp
+                stateYear={state.year}
+                daysOfWeek={daysOfWeek}
+                currentMonth={state.currentMonth}
+                stateToday={state.today}
+                stateMonth={state.month}
+                startYear={state.startYear}
+              />
+            </div>
+          </section>
+        ) : (
+          <div>Loading...</div>
+        )}
+      </>
     </Layout>
   );
 };

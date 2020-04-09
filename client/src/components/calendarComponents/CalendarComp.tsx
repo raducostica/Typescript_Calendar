@@ -5,7 +5,7 @@ import calendarStyles from "../../styles/calendar.module.css";
 interface Props {
   stateYear: number;
   daysOfWeek: () => string[];
-  currentMonth: Array<{ id: number; selected: boolean }>;
+  currentMonth: Array<{ id: number; selected: boolean; completed: boolean }>;
   stateToday: number;
   stateMonth: number;
   startYear: number;
@@ -49,7 +49,20 @@ const CalendarComp: React.FC<Props> = ({
                 <p style={{ fontSize: 16 }}>{day.id}</p>
               </div>
             );
-          } else if (day.selected === true && startYear === stateYear) {
+          } else if (
+            day.completed &&
+            month === stateMonth &&
+            stateYear === year
+          ) {
+            return (
+              <div
+                key={i}
+                className={`${calendarStyles.challengeComplete} ${calendarStyles.day}`}
+              >
+                <p style={{ fontSize: 16 }}>{day.id}</p>
+              </div>
+            );
+          } else if (day.selected && startYear === year) {
             return (
               <div
                 key={i}

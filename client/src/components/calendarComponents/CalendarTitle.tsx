@@ -30,7 +30,7 @@ const CalendarTitle: React.FC<Props> = ({
           alignItems: "center",
         }}
       >
-        {!user.chall_start ? (
+        {!user.challstart ? (
           <button
             className={calendarStyles.startChallengeBtn}
             onClick={() => startChallenge()}

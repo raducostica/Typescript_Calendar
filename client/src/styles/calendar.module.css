@@ -50,6 +50,7 @@
   height: 100%;
   width: 100%;
   border: 1px dotted #000;
+  position: relative;
 }
 
 .calendarMonthsInfo {
@@ -116,7 +117,67 @@
 }
 
 .challenge {
-  background: rgba(208, 195, 253, 0.5);
+  /* background: rgba(208, 195, 253, 0.5); */
+  background: #fff;
+}
+
+.challenge::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  transform-origin: left center;
+  animation-delay: 0.2s;
+  animation-name: slideX;
+  animation-duration: 1.5s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes slideX {
+  from {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  to {
+    transform: scaleX(1);
+    background: rgba(208, 195, 253, 0.5);
+    opacity: 1;
+  }
+}
+
+.challengeComplete {
+  /* background: rgba(208, 195, 253, 0.5); */
+  background: #fff;
+}
+
+.challengeComplete::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  transform-origin: left center;
+  animation-delay: 0.2s;
+  animation-name: slideX2;
+  animation-duration: 1.5s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes slideX2 {
+  from {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  to {
+    transform: scaleX(1);
+    background: rgba(40, 190, 27, 0.5);
+    opacity: 1;
+  }
 }
 
 .startChallengeBtn {

@@ -11,12 +11,12 @@ const router = express.Router();
 router.get("/", authMiddleware, async (req, res) => {
   try {
     const response = await pool.query(
-      "SELECT email, username, github_user, points, chall_start, pointsdate, points FROM users WHERE uid=$1",
+      "SELECT email, username, github_user, points, challstart, pointsdate, points, githubdate FROM users WHERE uid=$1",
       [req.user.id]
     );
     return res.status(201).json(response.rows);
   } catch (error) {
-    return res.status(401).send(error);
+    return res.status(500).send(error);
   }
 });
 
@@ -26,7 +26,7 @@ router.post("/start", authMiddleware, async (req, res) => {
 
   try {
     const response = await pool.query(
-      "UPDATE users SET chall_start=$1 WHERE uid=$2",
+      "UPDATE users SET challstart=$1, githubdate=$1 WHERE uid=$2",
       [date, req.user.id]
     );
 

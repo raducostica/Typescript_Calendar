@@ -4,7 +4,7 @@ import AuthScreens from "./AuthScreens";
 
 import authStyles from "../styles/authStyles.module.css";
 
-import { FaArrowRight, FaEnvelope, FaLock } from "react-icons/fa";
+import { FaUserAlt, FaEnvelope, FaLock, FaUserTie } from "react-icons/fa";
 
 interface RegisterProps {
   handleClick: () => void;
@@ -81,7 +81,7 @@ const Register: React.FC<RegisterProps> = ({ handleClick }) => {
                 handleChange(e)
               }
             />
-            <FaEnvelope className={authStyles.icon} size={25} />
+            <FaUserAlt className={authStyles.icon} size={25} />
           </div>
           <div className={authStyles.inputGroupReg}>
             <input
@@ -105,7 +105,7 @@ const Register: React.FC<RegisterProps> = ({ handleClick }) => {
                 handleChange(e)
               }
             />
-            <FaEnvelope className={authStyles.icon} size={25} />
+            <FaUserTie className={authStyles.icon} size={25} />
           </div>
         </>
       </AuthScreens>
