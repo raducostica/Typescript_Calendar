@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { History, LocationState } from "history";
-import AuthScreens from "./AuthScreens";
-import Layout from "./Layout";
+import AuthScreens from "../components/AuthScreens";
+import Layout from "../components/Layout";
 
 import homeStyles from "../styles/home.module.css";
-import Login from "./Login";
-import Register from "./Register";
+import Login from "../components/Login";
+import Register from "../components/Register";
 
 interface Props {
   history: History<LocationState>;

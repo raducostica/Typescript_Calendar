@@ -3,11 +3,14 @@ import ReactDOM from "react-dom";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import AuthProvider from "./context/AuthContext";
+import NoteProvider from "./context/NoteContext";
 
 ReactDOM.render(
   <React.StrictMode>
     <AuthProvider>
-      <App />
+      <NoteProvider>
+        <App />
+      </NoteProvider>
     </AuthProvider>
   </React.StrictMode>,
   document.getElementById("root")

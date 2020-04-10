@@ -17,7 +17,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = (
     <Route
       {...rest}
       render={(props) => {
-        if (!isAuthenticated) {
+        if (!isAuthenticated && !isLoading) {
           return (
             <Redirect
               to={{

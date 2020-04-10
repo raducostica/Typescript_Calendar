@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useEffect } from "react";
+import React, { createContext, useReducer } from "react";
 import axios from "axios";
 import setAuthToken from "../utils/setAuthToken";
 
@@ -17,6 +17,8 @@ interface IState {
     githubdate: string | null;
   };
 }
+
+type Dispatch = React.Dispatch<IAction>;
 
 interface IAction {
   type: string;
@@ -179,28 +181,20 @@ const AuthProvider: React.FC = ({ children }) => {
 
     try {
       let current = new Date();
-      let lastUpdated = new Date(date);
       let points = state.user.points;
+      console.log("true");
+      points = points + 5;
 
-      if (
-        current.getDate() > lastUpdated.getDate() &&
-        current.getMonth() >= lastUpdated.getMonth() &&
-        current.getFullYear() >= lastUpdated.getFullYear()
-      ) {
-        console.log("true");
-        points = points + 5;
+      let data = {
+        github_user: state.user.github_user,
+        day: current.getDate(),
+        month: current.getMonth() + 1,
+        year: current.getFullYear(),
+        points,
+      };
+      const res = await axios.post("/api/commits", data, config);
 
-        let data = {
-          github_user: state.user.github_user,
-          day: current.getDate(),
-          month: current.getMonth() + 1,
-          year: current.getFullYear(),
-          points,
-        };
-        const res = await axios.post("/api/commits", data, config);
-
-        dispatch({ type: "UPDATE_POINTS_GH", payload: { current, points } });
-      }
+      dispatch({ type: "UPDATE_POINTS_GH", payload: { current, points } });
     } catch (error) {
       return console.log(error);
     }

@@ -1,9 +1,9 @@
 import React, { useContext, useEffect } from "react";
-
-import { GiSevenPointedStar } from "react-icons/gi";
+import { Link } from "react-router-dom";
 
 import navStyles from "../styles/navbar.module.css";
 import { AuthContext } from "../context/AuthContext";
+import { NoteContext } from "../context/NoteContext";
 
 const Navbar = () => {
   const { logout, isAuthenticated, loadUser } = useContext(AuthContext);
@@ -11,13 +11,18 @@ const Navbar = () => {
   useEffect(() => {
     loadUser();
   }, []);
+
   return (
     <nav className={navStyles.navbar}>
       <div className={navStyles.navContainer}>
-        <h2>100DaysOfCode</h2>
+        <h2>
+          <Link to="/">100DaysOfCode</Link>
+        </h2>
         {isAuthenticated && (
           <ul className={navStyles.navlinks}>
-            <li>Leaderboards</li>
+            <li>
+              <Link to="/leaderboard"> Leaderboards</Link>
+            </li>
             <li>
               <a onClick={logout} href="#!">
                 Logout

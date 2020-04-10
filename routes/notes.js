@@ -6,16 +6,15 @@ const authMiddleware = require("../middleware/authMiddleware");
 const router = express.Router();
 
 router.post("/", authMiddleware, async (req, res) => {
-  const { task, created_for } = req.body;
+  const { content, createdon } = req.body;
 
-  if (task === "" || created_for === "") {
+  if (content === "" || createdon === "") {
     return res.status(401).json({ msg: "Invalid Information" });
   }
   try {
-    let userID = req.user.id;
     const query = await pool.query(
-      "INSERT INTO todos(task, created_for, user_id) VALUES($1, $2, $3)",
-      [task, created_for, userID]
+      "INSERT INTO notes(content, createdon, userid) VALUES($1, $2, $3)",
+      [content, createdon, req.user.id]
     );
 
     return res.status(201).json({ msg: "success" });
@@ -26,7 +25,7 @@ router.post("/", authMiddleware, async (req, res) => {
 
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const query = await pool.query("SELECT * FROM todos WHERE user_id = $1", [
+    const query = await pool.query("SELECT * FROM notes WHERE userid = $1", [
       req.user.id,
     ]);
 
@@ -41,10 +40,10 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
   try {
     // check if exists
-    const query = await pool.query("UPDATE todos SET task=$1 WHERE tid=$2", [
-      task,
-      parseInt(req.params.id),
-    ]);
+    const query = await pool.query(
+      "UPDATE notes SET content=$1 WHERE tid=$2 AND userid=$3",
+      [task, parseInt(req.params.id), req, user.id]
+    );
 
     return res.status(201).json({ msg: "success" });
   } catch (error) {
@@ -54,7 +53,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
 router.delete("/:id", authMiddleware, async (req, res) => {
   try {
-    const query = await pool.query("DELETE FROM todos WHERE tid = $1", [
+    const query = await pool.query("DELETE FROM notes WHERE tid = $1", [
       parseInt(req.params.id),
     ]);
 

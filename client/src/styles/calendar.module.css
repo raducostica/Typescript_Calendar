@@ -51,6 +51,36 @@
   width: 100%;
   border: 1px dotted #000;
   position: relative;
+  /* cursor: pointer; */
+}
+
+.day p {
+  font-size: 16;
+  position: relative;
+  z-index: 1;
+}
+
+.dayTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 3px;
+  position: relative;
+}
+
+.dayAdd {
+  font-size: 1.1rem;
+  position: absolute;
+  top: 2%;
+  right: 2%;
+  background: #fff;
+  border-radius: 50%;
+  width: 23%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  cursor: pointer;
 }
 
 .calendarMonthsInfo {
@@ -60,7 +90,6 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  /* align-items: center; */
 }
 
 .calendarSideProfileInfo {
@@ -190,4 +219,8 @@
   cursor: pointer;
   box-shadow: 0 -3px 6px rgba(110, 106, 106, 0.16),
     0 2px 4px rgba(146, 145, 145, 0.23);
+}
+
+.dayContent {
+  font-size: 10px;
 }
