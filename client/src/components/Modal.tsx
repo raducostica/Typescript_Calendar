@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 
 import modalStyles from "../styles/modal.module.css";
+import { NoteContext } from "../context/NoteContext";
 
 interface Props {
   activeModal: boolean;
@@ -9,6 +10,9 @@ interface Props {
   handleSubmit: () => void;
   content: string;
   date: string;
+  editMode: boolean;
+  currentID: number;
+  setActiveModal: (active: boolean) => void;
 }
 
 const Modal: React.FC<Props> = ({
@@ -18,12 +22,19 @@ const Modal: React.FC<Props> = ({
   handleSubmit,
   content,
   date,
+  editMode,
+  currentID,
+  setActiveModal,
 }) => {
   const [totalText, setTotalText] = useState(300);
+
+  const { editNote } = useContext(NoteContext);
 
   useEffect(() => {
     if (content === "") {
       setTotalText(300);
+    } else {
+      setTotalText(300 - content.length);
     }
   }, [content]);
 
@@ -36,6 +47,11 @@ const Modal: React.FC<Props> = ({
     } else if (totalText > 0) {
       setTotalText(totalText - 1);
     }
+  };
+
+  const handleEditNote = () => {
+    setActiveModal(false);
+    editNote(currentID, content);
   };
 
   return (
@@ -62,7 +78,11 @@ const Modal: React.FC<Props> = ({
             </div>
             <div className={modalStyles.btnContainer}>
               <button onClick={handleCloseModal}>Cancel</button>
-              <button onClick={handleSubmit}>Submit</button>
+              {!editMode ? (
+                <button onClick={handleSubmit}>Submit</button>
+              ) : (
+                <button onClick={handleEditNote}>Edit</button>
+              )}
             </div>
           </div>
         </>

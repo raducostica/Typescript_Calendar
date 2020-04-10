@@ -18,8 +18,6 @@ interface IState {
   };
 }
 
-type Dispatch = React.Dispatch<IAction>;
-
 interface IAction {
   type: string;
   payload: any;
@@ -182,7 +180,6 @@ const AuthProvider: React.FC = ({ children }) => {
     try {
       let current = new Date();
       let points = state.user.points;
-      console.log("true");
       points = points + 5;
 
       let data = {
@@ -210,17 +207,6 @@ const AuthProvider: React.FC = ({ children }) => {
     let lastUpdated = new Date(date);
     let points = state.user.points;
 
-    console.log(
-      currentDate.getDate(),
-      currentDate.getMonth(),
-      currentDate.getFullYear()
-    );
-    console.log(
-      lastUpdated.getDate(),
-      lastUpdated.getMonth(),
-      lastUpdated.getFullYear()
-    );
-
     if (
       (currentDate.getDate() > lastUpdated.getDate() &&
         currentDate.getMonth() >= lastUpdated.getMonth() &&
@@ -241,7 +227,6 @@ const AuthProvider: React.FC = ({ children }) => {
 
       dispatch({ type: "UPDATE_POINTS", payload: data });
     }
-    console.log(state.user);
   };
   return (
     <AuthContext.Provider

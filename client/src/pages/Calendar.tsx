@@ -17,7 +17,7 @@ interface Calendar {
       id: number;
       selected: boolean;
       completed: boolean;
-      content: string[];
+      content: { nid: number; content: string; createdon: string }[];
     }>
   >;
   year: number;
@@ -32,7 +32,7 @@ interface Calendar {
     id: number;
     selected: boolean;
     completed: boolean;
-    content: string[];
+    content: { nid: number; content: string; createdon: string }[];
   }>;
 }
 
@@ -120,6 +120,7 @@ const Calendar = () => {
   }, []);
 
   useEffect(() => {
+    console.log(user);
     if (user.challstart && state.active) {
       checkDate();
       // get date user started challenege
@@ -140,6 +141,7 @@ const Calendar = () => {
       let tempDays = [...state.days];
 
       let daysSinceStart = getDaysSinceStart() + startDate + firstDay;
+      let daysX = 0;
 
       for (let i = 0; i < tempDays.length; i++) {
         if (i === startMonth) {
@@ -151,6 +153,7 @@ const Calendar = () => {
 
             if (j < daysSinceStart) {
               tempDays[i][j].completed = true;
+              daysX++;
             }
           }
         } else if (i > startMonth) {
@@ -164,8 +167,9 @@ const Calendar = () => {
               challengeDays++;
             }
 
-            if (j <= daysSinceStart && tempDays[i][j].id !== 0) {
+            if (daysX < getDaysSinceStart() && tempDays[i][j].id !== 0) {
               tempDays[i][j].completed = true;
+              daysX++;
             }
           }
         }
@@ -184,10 +188,6 @@ const Calendar = () => {
       });
     }
   }, [user.challstart, state.active]);
-
-  useEffect(() => {
-    console.log(noteState);
-  }, [noteState]);
 
   const getDaysinMonth = (month: number, year: number): number => {
     return 32 - new Date(year, month, 32).getDate();
@@ -224,6 +224,10 @@ const Calendar = () => {
     return months[month];
   };
 
+  const getPercentageComplete = (): number => {
+    return (getDaysSinceStart() / 101) * 100;
+  };
+
   const getAllMonthsInYear = (
     year: number
   ): Array<
@@ -231,7 +235,7 @@ const Calendar = () => {
       id: number;
       selected: boolean;
       completed: boolean;
-      content: string[];
+      content: { nid: number; content: string; createdon: string }[];
     }>
   > => {
     let arrayOfYear = [];
@@ -264,70 +268,46 @@ const Calendar = () => {
     return arrayOfYear;
   };
 
-  const addContentToDays = () => {
-    let tempDays = [...state.days];
-
-    // tempDays.forEach((day) => {
-    //   day.map((d) => {
-    //     if (d.content.length > 0) {
-    //       d.content = [];
-    //     }
-    //     return d;
-    //   });
-    // });
-
-    console.log(tempDays);
-
-    let tempNotes = noteState.notes.sort(function (
-      a: {
-        nid: number;
-        content: string;
-        createdon: string;
-        userid: number;
-      },
-      b: {
-        nid: number;
-        content: string;
-        createdon: string;
-        userid: number;
+  const tester = (
+    month: number,
+    tempMonth: {
+      id: number;
+      selected: boolean;
+      completed: boolean;
+      content: { nid: number; content: string; createdon: string }[];
+    }[]
+  ) => {
+    let notes = [...noteState.notes];
+    console.log(notes);
+    tempMonth.map((day) => {
+      if (day.content.length > 0) {
+        day.content = [];
       }
-    ) {
-      let total: any =
-        new Date(a.createdon).getTime() - new Date(b.createdon).getTime();
-      return total;
     });
 
-    let x = 0;
-    for (let i = 0; i < tempDays.length; i++) {
-      tempDays[i].map((day) => {
-        if (day.content.length > 0) {
-          day.content = [];
-        }
-        if (x < tempNotes.length) {
-          let date = new Date(tempNotes[x].createdon);
-
-          if (day.id === date.getDate() && i === date.getMonth()) {
-            day.content.push(tempNotes[x].content);
-            x++;
-          }
+    for (let i = 0; i < notes.length; i++) {
+      let date = new Date(notes[i].createdon);
+      tempMonth.map((day) => {
+        if (day.id === date.getDate() && month === date.getMonth()) {
+          day.content.push(notes[i]);
+          return day;
         }
       });
     }
 
-    let currentMonth = tempDays[state.month];
-
-    setState({
-      ...state,
-      days: tempDays,
-      currentMonth,
-    });
+    return tempMonth;
   };
 
   useEffect(() => {
     if (noteState.notes.length > 0) {
-      addContentToDays();
+      let currentMonth = tester(state.month, state.currentMonth);
+
+      setState({
+        ...state,
+        currentMonth,
+      });
     }
-  }, [noteState.notes]);
+  }, [noteState.notes, state.month]);
 
   const startChallenge = () => {
     let month = new Date().getMonth();
@@ -340,8 +320,10 @@ const Calendar = () => {
 
     updateStartChallenge({ date: `${month + 1}-${day}-${year}` });
 
+    // looping through each month of the year
     for (let i = 0; i < tempDays.length; i++) {
       if (i === month) {
+        // looping through the days of each month
         for (let j = day + firstDay; j < tempDays[i].length; j++) {
           if (j >= day) {
             tempDays[i][j].selected = true;
@@ -363,7 +345,6 @@ const Calendar = () => {
     }
 
     let currentMonth = getCurrentMonthArray(state.month);
-    console.log(challengeDays);
 
     setState({
       ...state,
@@ -382,18 +363,19 @@ const Calendar = () => {
     id: number;
     selected: boolean;
     completed: boolean;
-    content: string[];
+    content: { nid: number; content: string; createdon: string }[];
   }[] => {
     return state.days[month];
   };
 
+  // CHANGING MONTH
   const changeMonth = (op: string) => {
     let month = 0;
     let days: Array<Array<{
       id: number;
       selected: boolean;
       completed: boolean;
-      content: string[];
+      content: { nid: number; content: string; createdon: string }[];
     }>> = [];
     if (op === "+") {
       month = state.month + 1;
@@ -431,6 +413,7 @@ const Calendar = () => {
     }
   };
 
+  // GET DAY OF MONTH
   const handleEvent = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
   ): void => {
@@ -457,6 +440,7 @@ const Calendar = () => {
               />
             </div>
             <div className={calendarStyles.calendar}>
+              <p>{getPercentageComplete().toFixed(2)}% Complete</p>
               <CalendarTitle
                 startChallenge={startChallenge}
                 changeMonth={changeMonth}

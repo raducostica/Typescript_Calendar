@@ -3,6 +3,9 @@ import React, { useState, useContext } from "react";
 import calendarStyles from "../../styles/calendar.module.css";
 import Modal from "../Modal";
 import { NoteContext } from "../../context/NoteContext";
+import { AuthContext } from "../../context/AuthContext";
+
+import SingleDay from "./SingleDay";
 
 interface Props {
   stateYear: number;
@@ -11,7 +14,7 @@ interface Props {
     id: number;
     selected: boolean;
     completed: boolean;
-    content: string[];
+    content: { nid: number; content: string; createdon: string }[];
   }>;
   stateToday: number;
   stateMonth: number;
@@ -31,8 +34,12 @@ const CalendarComp: React.FC<Props> = ({
   const [activeModal, setActiveModal] = useState<boolean>(false);
   const [content, setContent] = useState<string>("");
   const [date, setDate] = useState<string>("");
+  const [editMode, setEditMode] = useState<boolean>(false);
+  const [currentID, setCurrentID] = useState<number>(0);
+
   const handleDayClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     setActiveModal(true);
+    setEditMode(false);
     let date = `${stateMonth + 1}-${Number(
       e.currentTarget.getAttribute("data-info")
     )}-${stateYear}`;
@@ -49,20 +56,39 @@ const CalendarComp: React.FC<Props> = ({
   };
 
   const handleSubmit = () => {
-    addNote({ nid: noteState.notes.length, content, createdon: date });
-    setActiveModal(false);
-    setContent("");
+    if (noteState.notes.length < 4) {
+      addNote({ nid: noteState.notes.length, content, createdon: date });
+      setActiveModal(false);
+      setContent("");
+    }
+  };
+
+  const handleEditNoteModal = (
+    e: React.MouseEvent<HTMLParagraphElement, MouseEvent>
+  ) => {
+    setActiveModal(true);
+    let id = Number(e.currentTarget.parentElement?.getAttribute("data-id"));
+    let noteContent: any = noteState.notes.find((note: any) => note.nid === id);
+    console.log(noteState.notes);
+
+    setCurrentID(id);
+
+    setContent(noteContent.content);
+    setEditMode(true);
   };
 
   return (
     <>
       <Modal
         activeModal={activeModal}
+        setActiveModal={setActiveModal}
+        editMode={editMode}
         handleCloseModal={handleCloseModal}
         handleChange={handleChange}
         handleSubmit={handleSubmit}
         content={content}
         date={date}
+        currentID={currentID}
       />
       <div className={calendarStyles.weekDays}>
         {daysOfWeek().map((day, i) => {
@@ -92,147 +118,107 @@ const CalendarComp: React.FC<Props> = ({
           ) {
             if (day.content.length > 0) {
               return (
-                <Element
+                <SingleDay
+                  handleEditNoteModal={handleEditNoteModal}
                   key={i}
                   handleDayClick={handleDayClick}
                   day={day}
                   index={i}
                   classNameDay={`${calendarStyles.activeDay} ${calendarStyles.day}`}
-                  content={day.content}
+                  stateYear={stateYear}
                 />
               );
             }
             return (
-              <Element
+              <SingleDay
+                handleEditNoteModal={handleEditNoteModal}
                 key={i}
                 handleDayClick={handleDayClick}
                 day={day}
                 index={i}
                 classNameDay={`${calendarStyles.activeDay} ${calendarStyles.day}`}
-                content={null}
+                stateYear={stateYear}
               />
             );
-          } else if (
-            day.completed &&
-            month === stateMonth &&
-            stateYear === year
-          ) {
+          } else if (day.completed) {
             if (day.content.length > 0) {
               return (
-                <Element
+                <SingleDay
+                  handleEditNoteModal={handleEditNoteModal}
                   key={i}
                   handleDayClick={handleDayClick}
                   day={day}
                   index={i}
                   classNameDay={`${calendarStyles.challengeComplete} ${calendarStyles.day}`}
-                  content={day.content}
+                  stateYear={stateYear}
                 />
               );
             }
             return (
-              <Element
+              <SingleDay
+                handleEditNoteModal={handleEditNoteModal}
                 key={i}
                 handleDayClick={handleDayClick}
                 day={day}
                 index={i}
                 classNameDay={`${calendarStyles.challengeComplete} ${calendarStyles.day}`}
-                content={null}
+                stateYear={stateYear}
               />
             );
           } else if (day.selected && startYear === year) {
             if (day.content.length > 0) {
               return (
-                <Element
+                <SingleDay
+                  handleEditNoteModal={handleEditNoteModal}
                   key={i}
                   handleDayClick={handleDayClick}
                   day={day}
                   index={i}
                   classNameDay={`${calendarStyles.challenge} ${calendarStyles.day}`}
-                  content={day.content}
+                  stateYear={stateYear}
                 />
               );
             }
             return (
-              <Element
+              <SingleDay
+                handleEditNoteModal={handleEditNoteModal}
                 key={i}
                 handleDayClick={handleDayClick}
                 day={day}
                 index={i}
                 classNameDay={`${calendarStyles.challenge} ${calendarStyles.day}`}
-                content={null}
+                stateYear={stateYear}
               />
             );
           } else {
             if (day.content.length > 0) {
               return (
-                <Element
+                <SingleDay
+                  handleEditNoteModal={handleEditNoteModal}
                   key={i}
                   handleDayClick={handleDayClick}
                   day={day}
                   index={i}
                   classNameDay={calendarStyles.day}
-                  content={day.content}
+                  stateYear={stateYear}
                 />
               );
             }
             return (
-              <Element
+              <SingleDay
+                handleEditNoteModal={handleEditNoteModal}
                 key={i}
                 handleDayClick={handleDayClick}
                 day={day}
                 index={i}
                 classNameDay={calendarStyles.day}
-                content={null}
+                stateYear={stateYear}
               />
             );
           }
         })}
       </div>
     </>
-  );
-};
-
-interface elementProps {
-  handleDayClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
-  day: {
-    id: number;
-    selected: boolean;
-    completed: boolean;
-    content: string[];
-  };
-  index: number;
-  classNameDay: string;
-  content: string[] | null;
-}
-
-const Element: React.FC<elementProps> = ({
-  handleDayClick,
-  day,
-  index,
-  classNameDay,
-  content,
-}) => {
-  return (
-    <div
-      data-info={day.id}
-      onClick={handleDayClick}
-      key={index}
-      className={classNameDay}
-    >
-      <div className={calendarStyles.dayTop}>
-        <p>{day.id}</p>
-        <p className={calendarStyles.dayAdd} onClick={handleDayClick}>
-          +
-        </p>
-      </div>
-      {content?.map((info) => {
-        return (
-          <p key={index} className={calendarStyles.dayContent}>
-            {info}
-          </p>
-        );
-      })}
-    </div>
   );
 };
 

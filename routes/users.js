@@ -82,7 +82,7 @@ router.post("/", async (req, res) => {
       },
     };
 
-    jwt.sign(payload, "jwtSecret", { expiresIn: "2h" }, (err, token) => {
+    jwt.sign(payload, "jwtSecret", { expiresIn: "1d" }, (err, token) => {
       if (err) {
         throw err;
       }

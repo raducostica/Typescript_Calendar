@@ -36,13 +36,13 @@ router.get("/", authMiddleware, async (req, res) => {
 });
 
 router.put("/:id", authMiddleware, async (req, res) => {
-  const { task } = req.body;
+  const { note } = req.body;
 
   try {
     // check if exists
     const query = await pool.query(
-      "UPDATE notes SET content=$1 WHERE tid=$2 AND userid=$3",
-      [task, parseInt(req.params.id), req, user.id]
+      "UPDATE notes SET content=$1 WHERE nid=$2 AND userid=$3",
+      [note, parseInt(req.params.id), req.user.id]
     );
 
     return res.status(201).json({ msg: "success" });
@@ -53,9 +53,10 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
 router.delete("/:id", authMiddleware, async (req, res) => {
   try {
-    const query = await pool.query("DELETE FROM notes WHERE tid = $1", [
-      parseInt(req.params.id),
-    ]);
+    const query = await pool.query(
+      "DELETE FROM notes WHERE nid = $1 AND userid=$2",
+      [parseInt(req.params.id), req.user.id]
+    );
 
     return res.status(201).json({ msg: "success" });
   } catch (error) {
