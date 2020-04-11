@@ -31,7 +31,7 @@ const SingleDay: React.FC<elementProps> = ({
   const handleDeleteNote = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    deleteNote(e.currentTarget.parentElement?.getAttribute("data-id"));
+    deleteNote(Number(e.currentTarget.getAttribute("data-id")));
   };
 
   return (
@@ -105,6 +105,7 @@ const SingleDay: React.FC<elementProps> = ({
                   zIndex: 5,
                   color: "#f7f7f7",
                 }}
+                data-id={info.nid}
                 onClick={handleDeleteNote}
               >
                 -

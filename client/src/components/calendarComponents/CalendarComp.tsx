@@ -56,11 +56,9 @@ const CalendarComp: React.FC<Props> = ({
   };
 
   const handleSubmit = () => {
-    if (noteState.notes.length < 4) {
-      addNote({ nid: noteState.notes.length, content, createdon: date });
-      setActiveModal(false);
-      setContent("");
-    }
+    addNote({ nid: noteState.length + 1, content, createdon: date });
+    setActiveModal(false);
+    setContent("");
   };
 
   const handleEditNoteModal = (
@@ -165,7 +163,7 @@ const CalendarComp: React.FC<Props> = ({
                 stateYear={stateYear}
               />
             );
-          } else if (day.selected && startYear === year) {
+          } else if (day.selected) {
             if (day.content.length > 0) {
               return (
                 <SingleDay

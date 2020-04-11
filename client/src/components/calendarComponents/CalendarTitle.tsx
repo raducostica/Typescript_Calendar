@@ -11,6 +11,7 @@ interface Props {
   getMonthName: (month: number) => string;
   stateMonth: number;
   stateYear: number;
+  userChallStart: string;
 }
 
 const CalendarTitle: React.FC<Props> = ({
@@ -19,6 +20,7 @@ const CalendarTitle: React.FC<Props> = ({
   getMonthName,
   stateMonth,
   stateYear,
+  userChallStart,
 }) => {
   const { user } = useContext(AuthContext);
   return (
@@ -30,7 +32,7 @@ const CalendarTitle: React.FC<Props> = ({
           alignItems: "center",
         }}
       >
-        {!user.challstart ? (
+        {!userChallStart ? (
           <button
             className={calendarStyles.startChallengeBtn}
             onClick={() => startChallenge()}

@@ -11,12 +11,48 @@ const router = express.Router();
 router.get("/", authMiddleware, async (req, res) => {
   try {
     const response = await pool.query(
-      "SELECT email, username, github_user, points, challstart, pointsdate, points, githubdate FROM users WHERE uid=$1",
+      "SELECT uid, email, username, github_user, points, challstart, pointsdate, points, githubdate FROM users WHERE uid=$1",
       [req.user.id]
     );
     return res.status(201).json(response.rows);
   } catch (error) {
     return res.status(500).send(error);
+  }
+});
+
+router.get("/leaderboards", authMiddleware, async (req, res) => {
+  let page = parseInt(req.query.page);
+  // let limit = parseInt(req.query.limit);
+
+  let startIndex = (page - 1) * 2;
+  let endIndex = page * 2;
+
+  try {
+    const response = await pool.query(
+      `SELECT username, points FROM users ORDER BY points DESC OFFSET ${startIndex} LIMIT 2`
+    );
+
+    let results = {};
+
+    if (endIndex < response.rows.length) {
+      results.next = {
+        page: page + 1,
+      };
+    }
+
+    if (startIndex > 0) {
+      results.previous = {
+        page: page - 1,
+      };
+    }
+
+    results.users = response.rows;
+
+    console.log(results);
+
+    return res.status(201).json(results);
+  } catch (error) {
+    console.log(error);
   }
 });
 

@@ -28,6 +28,7 @@ interface Calendar {
   startMonth: number;
   startYear: number;
   active: boolean;
+  userChallStart: string;
   currentMonth: Array<{
     id: number;
     selected: boolean;
@@ -58,6 +59,7 @@ const Calendar = () => {
     active: false,
     startYear: 0,
     currentMonth: [],
+    userChallStart: "",
   });
 
   const getDaysSinceStart = (): number => {
@@ -91,7 +93,6 @@ const Calendar = () => {
   };
 
   useEffect(() => {
-    updatePoints(user.pointsdate);
     getNotes();
     let month = new Date().getMonth();
     let year = new Date().getFullYear();
@@ -105,6 +106,7 @@ const Calendar = () => {
 
     let currentMonth = days[month];
     setState({
+      ...state,
       days,
       month,
       year,
@@ -120,7 +122,101 @@ const Calendar = () => {
   }, []);
 
   useEffect(() => {
-    console.log(user);
+    console.log("points updated");
+    updatePoints(user.pointsdate);
+  }, [user.pointsdate]);
+
+  useEffect(() => {
+    console.log(user, "effect");
+    checkUserChall(state.startMonth);
+    // if (user.challstart && state.active) {
+    //   checkDate();
+    //   // get date user started challenege
+    //   let date = new Date(user.challstart);
+    //   // starting day
+    //   let startDate = date.getDate();
+    //   // starting month
+    //   let startMonth = date.getMonth();
+    //   // starting year
+    //   let startYear = date.getFullYear();
+    //   // keep track of how many days we loop over
+    //   let challengeDays = 0;
+
+    //   // get first day of the month
+    //   let firstDay: number = new Date(state.year, state.month).getDay();
+
+    //   // copy array which holds the months and days for the year
+    //   let tempDays = [...state.days];
+
+    //   let daysSinceStart = getDaysSinceStart() + startDate + firstDay;
+    //   let daysX = 0;
+
+    //   for (let i = 0; i < tempDays.length; i++) {
+    //     if (i === startMonth) {
+    //       for (let j = startDate + firstDay - 1; j < tempDays[i].length; j++) {
+    //         if (j >= startDate) {
+    //           tempDays[i][j].selected = true;
+    //           challengeDays++;
+    //         }
+
+    //         if (j < daysSinceStart) {
+    //           tempDays[i][j].completed = true;
+    //           daysX++;
+    //         }
+    //       }
+    //     } else if (i > startMonth) {
+    //       for (let j = 0; j < tempDays[i].length; j++) {
+    //         if (challengeDays === 101) {
+    //           break;
+    //         }
+
+    //         if (tempDays[i][j].id !== 0) {
+    //           tempDays[i][j].selected = true;
+    //           challengeDays++;
+    //         }
+
+    //         if (daysX < getDaysSinceStart() && tempDays[i][j].id !== 0) {
+    //           tempDays[i][j].completed = true;
+    //           daysX++;
+    //         }
+    //       }
+    //     }
+    //   }
+
+    //   let currentMonth = tempDays[state.month];
+
+    //   setState({
+    //     ...state,
+    //     days: tempDays,
+    //     challengeDays,
+    //     startDate,
+    //     startMonth,
+    //     startYear,
+    //     currentMonth,
+    //     userChallStart: user.challstart,
+    //   });
+    // }
+  }, [user.challstart, state.active]);
+
+  useEffect(() => {
+    if (state.active) {
+      let currentMonth = tester(state.month, state.currentMonth);
+
+      setState({
+        ...state,
+        currentMonth,
+      });
+    }
+  }, [noteState.notes, state.month, state.active]);
+
+  useEffect(() => {
+    if (user.challstart && state.year === state.startYear) {
+      checkUserChall(state.startMonth);
+    }
+  }, [state.year]);
+
+  const checkUserChall = (month: number) => {
+    console.log("running");
     if (user.challstart && state.active) {
       checkDate();
       // get date user started challenege
@@ -135,13 +231,14 @@ const Calendar = () => {
       let challengeDays = 0;
 
       // get first day of the month
-      let firstDay: number = new Date(state.year, state.month).getDay();
+      let firstDay: number = new Date(state.year, month).getDay();
+      console.log(firstDay);
 
       // copy array which holds the months and days for the year
       let tempDays = [...state.days];
 
       let daysSinceStart = getDaysSinceStart() + startDate + firstDay;
-      let daysX = 0;
+      let daysX = 1;
 
       for (let i = 0; i < tempDays.length; i++) {
         if (i === startMonth) {
@@ -185,9 +282,10 @@ const Calendar = () => {
         startMonth,
         startYear,
         currentMonth,
+        userChallStart: user.challstart,
       });
     }
-  }, [user.challstart, state.active]);
+  };
 
   const getDaysinMonth = (month: number, year: number): number => {
     return 32 - new Date(year, month, 32).getDate();
@@ -278,36 +376,29 @@ const Calendar = () => {
     }[]
   ) => {
     let notes = [...noteState.notes];
-    console.log(notes);
     tempMonth.map((day) => {
       if (day.content.length > 0) {
         day.content = [];
       }
     });
 
-    for (let i = 0; i < notes.length; i++) {
-      let date = new Date(notes[i].createdon);
-      tempMonth.map((day) => {
-        if (day.id === date.getDate() && month === date.getMonth()) {
-          day.content.push(notes[i]);
-          return day;
-        }
-      });
+    if (notes.length > 0) {
+      for (let i = 0; i < notes.length; i++) {
+        let date = new Date(notes[i].createdon);
+        tempMonth.map((day) => {
+          if (day.id === date.getDate() && month === date.getMonth()) {
+            day.content.push(notes[i]);
+            return day;
+          } else {
+            return day;
+          }
+        });
+      }
+      return tempMonth;
+    } else {
+      return tempMonth;
     }
-
-    return tempMonth;
   };
-
-  useEffect(() => {
-    if (noteState.notes.length > 0) {
-      let currentMonth = tester(state.month, state.currentMonth);
-
-      setState({
-        ...state,
-        currentMonth,
-      });
-    }
-  }, [noteState.notes, state.month]);
 
   const startChallenge = () => {
     let month = new Date().getMonth();
@@ -440,13 +531,17 @@ const Calendar = () => {
               />
             </div>
             <div className={calendarStyles.calendar}>
-              <p>{getPercentageComplete().toFixed(2)}% Complete</p>
+              {state.userChallStart && (
+                <p>{getPercentageComplete().toFixed(2)}% Complete</p>
+              )}
+
               <CalendarTitle
                 startChallenge={startChallenge}
                 changeMonth={changeMonth}
                 getMonthName={getMonthName}
                 stateMonth={state.month}
                 stateYear={state.year}
+                userChallStart={state.userChallStart}
               />
               <CalendarComp
                 stateYear={state.year}

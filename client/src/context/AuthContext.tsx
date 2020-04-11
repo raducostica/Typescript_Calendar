@@ -8,6 +8,7 @@ interface IState {
   isLoading: boolean;
   error: string | null;
   user: {
+    uid: number | null;
     email: string;
     username: string;
     github_user: string | null;
@@ -15,6 +16,11 @@ interface IState {
     challstart: string | null;
     pointsdate: string | null;
     githubdate: string | null;
+  };
+  allUserPoints: {
+    users: { username: string; points: number }[];
+    prev: { page: number };
+    next: { page: number };
   };
 }
 
@@ -29,6 +35,7 @@ const initialState: IState = {
   isLoading: true,
   error: "",
   user: {
+    uid: null,
     email: "",
     username: "",
     github_user: "",
@@ -36,6 +43,11 @@ const initialState: IState = {
     challstart: "",
     pointsdate: "",
     githubdate: "",
+  },
+  allUserPoints: {
+    users: [],
+    prev: { page: 0 },
+    next: { page: 0 },
   },
 };
 export const AuthContext = createContext<IState | any>(initialState);
@@ -92,6 +104,12 @@ const reducer = (state: IState, action: IAction) => {
           points: action.payload.points,
           githubdate: action.payload.current,
         },
+      };
+    case "GET_POINTS":
+      return {
+        ...state,
+        allUserPoints: action.payload,
+        isLoading: false,
       };
     default:
       return state;
@@ -203,16 +221,29 @@ const AuthProvider: React.FC = ({ children }) => {
         "Content-Type": "application/json",
       },
     };
-    let currentDate = new Date();
+    let currentDate = new Date("2021-04-13T02:17:44.000Z");
     let lastUpdated = new Date(date);
     let points = state.user.points;
 
     if (
       (currentDate.getDate() > lastUpdated.getDate() &&
-        currentDate.getMonth() >= lastUpdated.getMonth() &&
-        currentDate.getFullYear() >= lastUpdated.getFullYear()) ||
-      (currentDate.getMonth() > lastUpdated.getMonth() + 1 &&
-        currentDate.getFullYear() === lastUpdated.getFullYear())
+        currentDate.getMonth() === lastUpdated.getMonth() &&
+        currentDate.getFullYear() === lastUpdated.getFullYear()) ||
+      (currentDate.getDate() <= lastUpdated.getDate() &&
+        currentDate.getMonth() > lastUpdated.getMonth() &&
+        currentDate.getFullYear() === lastUpdated.getFullYear()) ||
+      (currentDate.getDate() > lastUpdated.getDate() &&
+        currentDate.getMonth() > lastUpdated.getMonth() &&
+        currentDate.getFullYear() === lastUpdated.getFullYear()) ||
+      (currentDate.getDate() <= lastUpdated.getDate() &&
+        currentDate.getMonth() <= lastUpdated.getMonth() &&
+        currentDate.getFullYear() > lastUpdated.getFullYear()) ||
+      (currentDate.getDate() > lastUpdated.getDate() &&
+        currentDate.getMonth() <= lastUpdated.getMonth() &&
+        currentDate.getFullYear() > lastUpdated.getFullYear()) ||
+      (currentDate.getDate() > lastUpdated.getDate() &&
+        currentDate.getMonth() > lastUpdated.getMonth() &&
+        currentDate.getFullYear() > lastUpdated.getFullYear())
     ) {
       points += 10;
 
@@ -228,12 +259,26 @@ const AuthProvider: React.FC = ({ children }) => {
       dispatch({ type: "UPDATE_POINTS", payload: data });
     }
   };
+
+  const getUserPoints = async (page: number) => {
+    try {
+      const res = await axios.get(
+        `/api/users/leaderboards?page=${page}&limit=1`
+      );
+
+      console.log(res.data);
+      dispatch({ type: "GET_POINTS", payload: res.data });
+    } catch (error) {
+      return console.log(error);
+    }
+  };
   return (
     <AuthContext.Provider
       value={{
         isAuthenticated: state.isAuthenticated,
         isLoading: state.isLoading,
         user: state.user,
+        allUserPoints: state.allUserPoints,
         login,
         loadUser,
         updateStartChallenge,
@@ -241,6 +286,7 @@ const AuthProvider: React.FC = ({ children }) => {
         logout,
         updatePoints,
         updateGithubPoints,
+        getUserPoints,
       }}
     >
       {children}

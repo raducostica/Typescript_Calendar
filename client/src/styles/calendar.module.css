@@ -43,6 +43,7 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(6, 1fr);
+  grid-gap: 1px;
   height: 75vh;
 }
 
@@ -219,6 +220,7 @@
   cursor: pointer;
   box-shadow: 0 -3px 6px rgba(110, 106, 106, 0.16),
     0 2px 4px rgba(146, 145, 145, 0.23);
+  margin-top: 0.5rem;
 }
 
 .dayContent {

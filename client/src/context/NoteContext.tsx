@@ -1,6 +1,5 @@
 import React, { createContext, useReducer } from "react";
 import axios from "axios";
-import { act } from "react-dom/test-utils";
 
 interface IActions {
   type: string;
@@ -37,8 +36,16 @@ const noteReducer: React.Reducer<Notes, any> = (
         ...state,
       };
     case "DELETE_NOTE":
+      console.log(action.payload);
       return {
-        notes: state.notes.filter((note) => note.nid != action.payload),
+        ...state,
+        notes: state.notes.filter((note: Note) => {
+          return note.nid !== Number(action.payload);
+        }),
+      };
+    case "DELETE_LAST_NOTE":
+      return {
+        ...state,
       };
     case "EDIT_NOTE":
       return {
