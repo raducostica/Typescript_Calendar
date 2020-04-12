@@ -9,6 +9,7 @@ interface Props {
   startChallenge: () => void;
   changeMonth: (op: string) => void;
   getMonthName: (month: number) => string;
+  stopChallenge: () => void;
   stateMonth: number;
   stateYear: number;
   userChallStart: string;
@@ -21,6 +22,7 @@ const CalendarTitle: React.FC<Props> = ({
   stateMonth,
   stateYear,
   userChallStart,
+  stopChallenge,
 }) => {
   const { user } = useContext(AuthContext);
   return (
@@ -37,11 +39,14 @@ const CalendarTitle: React.FC<Props> = ({
             className={calendarStyles.startChallengeBtn}
             onClick={() => startChallenge()}
           >
-            start challenge
+            Start Shallenge
           </button>
         ) : (
-          <button className={calendarStyles.startChallengeBtn}>
-            Challenge Started
+          <button
+            className={`${calendarStyles.startChallengeBtn} ${calendarStyles.stopBtn}`}
+            onClick={() => stopChallenge()}
+          >
+            Stop Challenge
           </button>
         )}
         <div style={{ display: "flex", alignItems: "center" }}>

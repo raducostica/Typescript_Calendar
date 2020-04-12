@@ -3,6 +3,8 @@ import { AuthContext } from "../context/AuthContext";
 import Layout from "../components/Layout";
 
 import leaderboardStyles from "../styles/leaderboard.module.css";
+import Loading from "../components/Loading";
+import calendarStyles from "../styles/calendar.module.css";
 
 const Leaderboard: React.FC = () => {
   const { getUserPoints, allUserPoints, isLoading } = useContext(AuthContext);
@@ -67,7 +69,9 @@ const Leaderboard: React.FC = () => {
     <Layout>
       <div className={leaderboardStyles.main}>
         {isLoading ? (
-          <div>Loading...</div>
+          <div className={calendarStyles.loadingContainer}>
+            <Loading />
+          </div>
         ) : (
           <>
             <div
@@ -90,6 +94,7 @@ const Leaderboard: React.FC = () => {
                 return (
                   <>
                     <div
+                      key={i}
                       style={{
                         display: "grid",
                         gridTemplateColumns: "repeat(3, 1fr)",

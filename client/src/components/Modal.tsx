@@ -77,7 +77,12 @@ const Modal: React.FC<Props> = ({
               <p>{totalText}</p>
             </div>
             <div className={modalStyles.btnContainer}>
-              <button onClick={handleCloseModal}>Cancel</button>
+              <button
+                className={modalStyles.cancelBtn}
+                onClick={handleCloseModal}
+              >
+                Cancel
+              </button>
               {!editMode ? (
                 <button onClick={handleSubmit}>Submit</button>
               ) : (

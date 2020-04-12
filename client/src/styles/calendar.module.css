@@ -11,6 +11,17 @@
   margin: 2rem;
 }
 
+.loadingContainer {
+  background: #f9f9f9;
+  box-shadow: 0 -3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  height: 75vh;
+  width: 100%;
+  margin: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .calendar {
   padding: 2rem 3rem 1rem 3rem;
   display: flex;
@@ -212,7 +223,7 @@
 
 .startChallengeBtn {
   border: none;
-  background: rgba(45, 67, 220, 0.5);
+  background: rgba(22, 235, 104, 0.5);
   text-transform: capitalize;
   padding: 0.5rem;
   border-radius: 10px;
@@ -221,6 +232,10 @@
   box-shadow: 0 -3px 6px rgba(110, 106, 106, 0.16),
     0 2px 4px rgba(146, 145, 145, 0.23);
   margin-top: 0.5rem;
+}
+
+.stopBtn {
+  background: rgba(219, 67, 56, 0.5);
 }
 
 .dayContent {

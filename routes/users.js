@@ -26,7 +26,7 @@ const getTotalUser = async () => {
 
     return response.rows[0].count;
   } catch (error) {
-    console.log(error);
+    return 0;
   }
 };
 
@@ -44,7 +44,6 @@ router.get("/leaderboards", authMiddleware, async (req, res) => {
     );
 
     let total = await getTotalUser();
-    console.log(total);
 
     let results = {};
 

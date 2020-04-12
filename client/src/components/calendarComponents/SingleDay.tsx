@@ -1,6 +1,10 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { NoteContext } from "../../context/NoteContext";
 import calendarStyles from "../../styles/calendar.module.css";
+import ViewModal from "../ViewModal";
+
+import singledayStyles from "../../styles/singleday.module.css";
+import modalStyles from "../../styles/modal.module.css";
 
 interface elementProps {
   handleDayClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
@@ -28,32 +32,32 @@ const SingleDay: React.FC<elementProps> = ({
 }) => {
   const { deleteNote } = useContext(NoteContext);
 
+  const [activeModal, setActiveModal] = useState<boolean>(false);
+
   const handleDeleteNote = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     deleteNote(Number(e.currentTarget.getAttribute("data-id")));
   };
 
-  const handleLongContent = () => {
+  const handleActiveModal = () => {
+    setActiveModal(!activeModal);
+  };
+
+  const handleLongContent = (daySliced: any, modalDayClass: any) => {
     return (
       <>
-        {day.content.slice(0, 3).map((info, i) => {
+        {daySliced.map((info: any, i: number) => {
           if (stateYear === new Date(info.createdon).getFullYear()) {
             return (
               <div
                 data-id={info.nid}
                 key={i}
-                style={{
-                  display: "flex",
-                  background: "#b380ff",
-                  justifyContent: "space-between",
-                  border: "1px dotted #444",
-                  maxHeight: "20%",
-                }}
+                className={singledayStyles.singleDayMain}
               >
                 {info.content.length > 10 ? (
                   <p
-                    className={calendarStyles.dayContent}
+                    className={modalDayClass}
                     style={{
                       cursor: "pointer",
                       width: "85%",
@@ -69,7 +73,7 @@ const SingleDay: React.FC<elementProps> = ({
                   </p>
                 ) : (
                   <p
-                    className={calendarStyles.dayContent}
+                    className={modalDayClass}
                     style={{
                       cursor: "pointer",
                       width: "85%",
@@ -95,6 +99,7 @@ const SingleDay: React.FC<elementProps> = ({
                     position: "relative",
                     zIndex: 5,
                     color: "#f7f7f7",
+                    padding: "0 5px",
                   }}
                   data-id={info.nid}
                   onClick={handleDeleteNote}
@@ -105,8 +110,9 @@ const SingleDay: React.FC<elementProps> = ({
             );
           }
         })}
-        {day.content.length > 3 ? (
+        {day.content.length > 3 && !activeModal ? (
           <button
+            onClick={handleActiveModal}
             style={{
               background: "#333",
               color: "#fff",
@@ -141,7 +147,15 @@ const SingleDay: React.FC<elementProps> = ({
           +
         </p>
       </div>
-      {handleLongContent()}
+      {activeModal ? (
+        <ViewModal handleActiveModal={handleActiveModal}>
+          <p>Notes for {new Date(day.content[0].createdon).toDateString()}</p>
+          <div style={{ padding: "1rem 0" }}>
+            {handleLongContent(day.content, modalStyles.singleDay)}
+          </div>
+        </ViewModal>
+      ) : null}
+      {handleLongContent(day.content.slice(0, 3), calendarStyles.dayContent)}
     </div>
   );
 };

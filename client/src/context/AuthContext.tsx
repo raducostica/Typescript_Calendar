@@ -111,6 +111,14 @@ const reducer = (state: IState, action: IAction) => {
         allUserPoints: action.payload,
         isLoading: false,
       };
+    case "START_CHALLENGE":
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          challstart: action.payload,
+        },
+      };
     default:
       return state;
   }
@@ -173,7 +181,7 @@ const AuthProvider: React.FC = ({ children }) => {
     dispatch({ type: "LOGOUT", payload: "" });
   };
 
-  const updateStartChallenge = async (data: { date: string }) => {
+  const updateStartChallenge = async (data: { date: string | null }) => {
     const config = {
       headers: {
         "Content-Type": "application/json",
@@ -221,7 +229,7 @@ const AuthProvider: React.FC = ({ children }) => {
         "Content-Type": "application/json",
       },
     };
-    let currentDate = new Date("2021-04-13T02:17:44.000Z");
+    let currentDate = new Date();
     let lastUpdated = new Date(date);
     let points = state.user.points;
 

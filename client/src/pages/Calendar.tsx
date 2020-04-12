@@ -10,6 +10,8 @@ import CalendarUserProfile from "../components/calendarComponents/CalendarUserPr
 import CalendarSideMonths from "../components/calendarComponents/CalendarSideMonths";
 import { AuthContext } from "../context/AuthContext";
 import { NoteContext } from "../context/NoteContext";
+import ViewModal from "../components/ViewModal";
+import Loading from "../components/Loading";
 
 interface Calendar {
   days: Array<
@@ -28,13 +30,13 @@ interface Calendar {
   startMonth: number;
   startYear: number;
   active: boolean;
-  userChallStart: string;
   currentMonth: Array<{
     id: number;
     selected: boolean;
     completed: boolean;
     content: { nid: number; content: string; createdon: string }[];
   }>;
+  activeModal: boolean;
 }
 
 const Calendar = () => {
@@ -59,38 +61,8 @@ const Calendar = () => {
     active: false,
     startYear: 0,
     currentMonth: [],
-    userChallStart: "",
+    activeModal: false,
   });
-
-  const getDaysSinceStart = (): number => {
-    let start = new Date(user.challstart);
-    let now = new Date();
-
-    let ms = +now - +start;
-
-    let daysSinceStart = Math.floor(ms / (24 * 60 * 60 * 1000));
-
-    return daysSinceStart;
-  };
-
-  const checkDate = () => {
-    let todayDate = new Date();
-    let githubdate = new Date(user.githubdate);
-
-    if (
-      (user.github_user &&
-        todayDate.getDate() > githubdate.getDate() &&
-        todayDate.getMonth() >= githubdate.getMonth() &&
-        todayDate.getFullYear() >= githubdate.getFullYear()) ||
-      (user.github_user &&
-        todayDate.getDate() <= githubdate.getDate() &&
-        todayDate.getMonth() > githubdate.getMonth() &&
-        todayDate.getFullYear() >= githubdate.getFullYear())
-    ) {
-      console.log("updating github points");
-      updateGithubPoints(user.githubdate);
-    }
-  };
 
   useEffect(() => {
     getNotes();
@@ -118,89 +90,19 @@ const Calendar = () => {
       startYear,
       currentMonth,
     });
-    // }
   }, []);
 
   useEffect(() => {
-    console.log("points updated");
     updatePoints(user.pointsdate);
   }, [user.pointsdate]);
 
   useEffect(() => {
-    console.log(user, "effect");
     checkUserChall(state.startMonth);
-    // if (user.challstart && state.active) {
-    //   checkDate();
-    //   // get date user started challenege
-    //   let date = new Date(user.challstart);
-    //   // starting day
-    //   let startDate = date.getDate();
-    //   // starting month
-    //   let startMonth = date.getMonth();
-    //   // starting year
-    //   let startYear = date.getFullYear();
-    //   // keep track of how many days we loop over
-    //   let challengeDays = 0;
-
-    //   // get first day of the month
-    //   let firstDay: number = new Date(state.year, state.month).getDay();
-
-    //   // copy array which holds the months and days for the year
-    //   let tempDays = [...state.days];
-
-    //   let daysSinceStart = getDaysSinceStart() + startDate + firstDay;
-    //   let daysX = 0;
-
-    //   for (let i = 0; i < tempDays.length; i++) {
-    //     if (i === startMonth) {
-    //       for (let j = startDate + firstDay - 1; j < tempDays[i].length; j++) {
-    //         if (j >= startDate) {
-    //           tempDays[i][j].selected = true;
-    //           challengeDays++;
-    //         }
-
-    //         if (j < daysSinceStart) {
-    //           tempDays[i][j].completed = true;
-    //           daysX++;
-    //         }
-    //       }
-    //     } else if (i > startMonth) {
-    //       for (let j = 0; j < tempDays[i].length; j++) {
-    //         if (challengeDays === 101) {
-    //           break;
-    //         }
-
-    //         if (tempDays[i][j].id !== 0) {
-    //           tempDays[i][j].selected = true;
-    //           challengeDays++;
-    //         }
-
-    //         if (daysX < getDaysSinceStart() && tempDays[i][j].id !== 0) {
-    //           tempDays[i][j].completed = true;
-    //           daysX++;
-    //         }
-    //       }
-    //     }
-    //   }
-
-    //   let currentMonth = tempDays[state.month];
-
-    //   setState({
-    //     ...state,
-    //     days: tempDays,
-    //     challengeDays,
-    //     startDate,
-    //     startMonth,
-    //     startYear,
-    //     currentMonth,
-    //     userChallStart: user.challstart,
-    //   });
-    // }
   }, [user.challstart, state.active]);
 
   useEffect(() => {
     if (state.active) {
-      let currentMonth = tester(state.month, state.currentMonth);
+      let currentMonth = addContentToDays(state.month, state.currentMonth);
 
       setState({
         ...state,
@@ -215,9 +117,67 @@ const Calendar = () => {
     }
   }, [state.year]);
 
+  // days since the start of the challenge
+  const getDaysSinceStart = (): number => {
+    let start = new Date(user.challstart);
+    let now = new Date();
+
+    let ms = +now - +start;
+
+    let daysSinceStart = Math.floor(ms / (24 * 60 * 60 * 1000));
+
+    return daysSinceStart;
+  };
+
+  // checking when points earned from github commits was last updated
+  const checkDate = () => {
+    let todayDate = new Date();
+    let githubdate = new Date(user.githubdate);
+
+    if (
+      (user.github_user &&
+        todayDate.getDate() > githubdate.getDate() &&
+        todayDate.getMonth() >= githubdate.getMonth() &&
+        todayDate.getFullYear() >= githubdate.getFullYear()) ||
+      (user.github_user &&
+        todayDate.getDate() <= githubdate.getDate() &&
+        todayDate.getMonth() > githubdate.getMonth() &&
+        todayDate.getFullYear() >= githubdate.getFullYear())
+    ) {
+      console.log("updating github points");
+      updateGithubPoints(user.githubdate);
+    }
+  };
+
+  const checkUserChallExpired = (): boolean => {
+    let challengeEnd = new Date(
+      new Date().setDate(new Date(user.challstart).getDate() + 100)
+    );
+
+    let todaysDate = new Date();
+
+    if (
+      todaysDate.getDate() >= challengeEnd.getDate() &&
+      todaysDate.getMonth() >= challengeEnd.getMonth() &&
+      todaysDate.getFullYear() >= challengeEnd.getFullYear()
+    ) {
+      if (user.challstart !== null) {
+        console.log("updating");
+        updateStartChallenge({ date: null });
+        setState({
+          ...state,
+          activeModal: true,
+        });
+      }
+      return true;
+    }
+
+    return false;
+  };
+
   const checkUserChall = (month: number) => {
-    console.log("running");
-    if (user.challstart && state.active) {
+    let endDate = checkUserChallExpired();
+    if (user.challstart && state.active && !endDate) {
       checkDate();
       // get date user started challenege
       let date = new Date(user.challstart);
@@ -282,7 +242,6 @@ const Calendar = () => {
         startMonth,
         startYear,
         currentMonth,
-        userChallStart: user.challstart,
       });
     }
   };
@@ -366,7 +325,7 @@ const Calendar = () => {
     return arrayOfYear;
   };
 
-  const tester = (
+  const addContentToDays = (
     month: number,
     tempMonth: {
       id: number;
@@ -398,6 +357,21 @@ const Calendar = () => {
     } else {
       return tempMonth;
     }
+  };
+
+  const stopChallenge = () => {
+    updateStartChallenge({ date: null });
+
+    let days = getAllMonthsInYear(state.year);
+
+    let tempMonth = days[state.month];
+
+    let currentMonth = addContentToDays(state.month, tempMonth);
+
+    setState({
+      ...state,
+      currentMonth,
+    });
   };
 
   const startChallenge = () => {
@@ -504,6 +478,13 @@ const Calendar = () => {
     }
   };
 
+  const handleActiveModal = () => {
+    setState({
+      ...state,
+      activeModal: false,
+    });
+  };
+
   // GET DAY OF MONTH
   const handleEvent = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -522,6 +503,19 @@ const Calendar = () => {
       <>
         {!isLoading ? (
           <section className={calendarStyles.container}>
+            {state.activeModal ? (
+              <ViewModal handleActiveModal={handleActiveModal}>
+                <div style={{ padding: "2rem" }}>
+                  <p style={{ fontSize: "4rem" }}>Congratulations!!</p>
+                  <div style={{ paddingTop: "1rem" }}>
+                    <p style={{ fontSize: "1.3rem" }}>
+                      You have completed the 100DaysOfCode Challenge!! <br />
+                      Keep Up the great work
+                    </p>
+                  </div>
+                </div>
+              </ViewModal>
+            ) : null}
             <div className={calendarStyles.calendarMonthsInfo}>
               <CalendarUserProfile />
               <CalendarSideMonths
@@ -531,17 +525,18 @@ const Calendar = () => {
               />
             </div>
             <div className={calendarStyles.calendar}>
-              {state.userChallStart && (
+              {user.challstart && (
                 <p>{getPercentageComplete().toFixed(2)}% Complete</p>
               )}
 
               <CalendarTitle
                 startChallenge={startChallenge}
+                stopChallenge={stopChallenge}
                 changeMonth={changeMonth}
                 getMonthName={getMonthName}
                 stateMonth={state.month}
                 stateYear={state.year}
-                userChallStart={state.userChallStart}
+                userChallStart={user.challstart}
               />
               <CalendarComp
                 stateYear={state.year}
@@ -554,7 +549,9 @@ const Calendar = () => {
             </div>
           </section>
         ) : (
-          <div>Loading...</div>
+          <div className={calendarStyles.loadingContainer}>
+            <Loading />
+          </div>
         )}
       </>
     </Layout>
