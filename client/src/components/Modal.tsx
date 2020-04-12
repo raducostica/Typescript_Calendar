@@ -63,7 +63,7 @@ const Modal: React.FC<Props> = ({
             <h3>Notes</h3>
             <p>Adding Note for {date}</p>
             <div className={modalStyles.content}>
-              <label htmlFor="note">My Note</label>
+              <label htmlFor="note">Note To Self</label>
               <textarea
                 name="note"
                 id=""

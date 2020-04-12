@@ -34,6 +34,101 @@ const SingleDay: React.FC<elementProps> = ({
     deleteNote(Number(e.currentTarget.getAttribute("data-id")));
   };
 
+  const handleLongContent = () => {
+    return (
+      <>
+        {day.content.slice(0, 3).map((info, i) => {
+          if (stateYear === new Date(info.createdon).getFullYear()) {
+            return (
+              <div
+                data-id={info.nid}
+                key={i}
+                style={{
+                  display: "flex",
+                  background: "#b380ff",
+                  justifyContent: "space-between",
+                  border: "1px dotted #444",
+                  maxHeight: "20%",
+                }}
+              >
+                {info.content.length > 10 ? (
+                  <p
+                    className={calendarStyles.dayContent}
+                    style={{
+                      cursor: "pointer",
+                      width: "85%",
+                      height: "100%",
+                    }}
+                    onClick={handleEditNoteModal}
+                  >
+                    {i + 1}.
+                    {info.content
+                      .slice(0, 10)
+                      .slice(0, info.content.lastIndexOf(" "))}
+                    ...
+                  </p>
+                ) : (
+                  <p
+                    className={calendarStyles.dayContent}
+                    style={{
+                      cursor: "pointer",
+                      width: "85%",
+                      height: "100%",
+                    }}
+                    onClick={handleEditNoteModal}
+                  >
+                    {i + 1}.{info.content}
+                  </p>
+                )}
+                <button
+                  style={{
+                    background: "blue",
+                    maxHeight: "100%",
+                    width: "15%",
+                    textAlign: "center",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    outline: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    position: "relative",
+                    zIndex: 5,
+                    color: "#f7f7f7",
+                  }}
+                  data-id={info.nid}
+                  onClick={handleDeleteNote}
+                >
+                  -
+                </button>
+              </div>
+            );
+          }
+        })}
+        {day.content.length > 3 ? (
+          <button
+            style={{
+              background: "#333",
+              color: "#fff",
+              position: "absolute",
+              zIndex: 1,
+              bottom: 0,
+              left: "50%",
+              transform: "translateX(-50%)",
+              height: "10px",
+              border: "none",
+              fontSize: "10px",
+              outline: "none",
+              cursor: "pointer",
+            }}
+          >
+            View More
+          </button>
+        ) : null}
+      </>
+    );
+  };
+
   return (
     <div data-info={day.id} key={index} className={classNameDay}>
       <div className={calendarStyles.dayTop}>
@@ -46,73 +141,7 @@ const SingleDay: React.FC<elementProps> = ({
           +
         </p>
       </div>
-      {day.content?.map((info, i) => {
-        if (stateYear === new Date(info.createdon).getFullYear())
-          return (
-            <div
-              data-id={info.nid}
-              key={i}
-              style={{
-                display: "flex",
-                background: "#b380ff",
-                justifyContent: "space-between",
-                border: "1px dotted #444",
-                maxHeight: "20%",
-              }}
-            >
-              {info.content.length > 10 ? (
-                <p
-                  className={calendarStyles.dayContent}
-                  style={{
-                    cursor: "pointer",
-                    width: "85%",
-                    height: "100%",
-                  }}
-                  onClick={handleEditNoteModal}
-                >
-                  {i + 1}.
-                  {info.content
-                    .slice(0, 10)
-                    .slice(0, info.content.lastIndexOf(" "))}
-                  ...
-                </p>
-              ) : (
-                <p
-                  className={calendarStyles.dayContent}
-                  style={{
-                    cursor: "pointer",
-                    width: "85%",
-                    height: "100%",
-                  }}
-                  onClick={handleEditNoteModal}
-                >
-                  {i + 1}.{info.content}
-                </p>
-              )}
-              <button
-                style={{
-                  background: "blue",
-                  maxHeight: "100%",
-                  width: "15%",
-                  textAlign: "center",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  outline: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  position: "relative",
-                  zIndex: 5,
-                  color: "#f7f7f7",
-                }}
-                data-id={info.nid}
-                onClick={handleDeleteNote}
-              >
-                -
-              </button>
-            </div>
-          );
-      })}
+      {handleLongContent()}
     </div>
   );
 };

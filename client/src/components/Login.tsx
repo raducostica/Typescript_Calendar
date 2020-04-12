@@ -63,7 +63,7 @@ const Login: React.FC<LoginProps> = ({ handleClick }) => {
           </div>
           <div className={authStyles.inputGroup}>
             <input
-              type="text"
+              type="password"
               name="password"
               placeholder="Password"
               value={user.password}

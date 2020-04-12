@@ -20,21 +20,35 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
+const getTotalUser = async () => {
+  try {
+    const response = await pool.query(`SELECT COUNT(username) FROM users;`);
+
+    return response.rows[0].count;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 router.get("/leaderboards", authMiddleware, async (req, res) => {
   let page = parseInt(req.query.page);
   // let limit = parseInt(req.query.limit);
+  let limit = 10;
 
-  let startIndex = (page - 1) * 2;
-  let endIndex = page * 2;
+  let startIndex = (page - 1) * limit;
+  let endIndex = page * limit;
 
   try {
     const response = await pool.query(
-      `SELECT username, points FROM users ORDER BY points DESC OFFSET ${startIndex} LIMIT 2`
+      `SELECT username, points, ROW_NUMBER () OVER (ORDER BY points DESC) FROM users OFFSET ${startIndex} LIMIT ${limit};`
     );
+
+    let total = await getTotalUser();
+    console.log(total);
 
     let results = {};
 
-    if (endIndex < response.rows.length) {
+    if (endIndex < total) {
       results.next = {
         page: page + 1,
       };
@@ -47,8 +61,6 @@ router.get("/leaderboards", authMiddleware, async (req, res) => {
     }
 
     results.users = response.rows;
-
-    console.log(results);
 
     return res.status(201).json(results);
   } catch (error) {

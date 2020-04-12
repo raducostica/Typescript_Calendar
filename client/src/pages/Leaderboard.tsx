@@ -2,6 +2,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import Layout from "../components/Layout";
 
+import leaderboardStyles from "../styles/leaderboard.module.css";
+
 const Leaderboard: React.FC = () => {
   const { getUserPoints, allUserPoints, isLoading } = useContext(AuthContext);
 
@@ -17,30 +19,53 @@ const Leaderboard: React.FC = () => {
   }, [page]);
 
   const nextPage = () => {
-    if (page < allUserPoints.users.length) {
-      setPage(allUserPoints.next.page);
+    if (page <= allUserPoints.next.page) {
+      setPage(page + 1);
     }
   };
 
   const prevPage = () => {
-    if (page < 1) {
-      setPage(1);
-    } else if (page > 1) {
-      setPage(allUserPoints.prev.page);
-      getUserPoints(page);
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+
+  const changePage = () => {
+    if (allUserPoints.previous && allUserPoints.next) {
+      return (
+        <>
+          <button
+            className={leaderboardStyles.btnBack}
+            onClick={() => prevPage()}
+          >
+            prev
+          </button>
+          <button className={leaderboardStyles.btn} onClick={() => nextPage()}>
+            next
+          </button>
+        </>
+      );
+    } else if (allUserPoints.next) {
+      return (
+        <button className={leaderboardStyles.btn} onClick={() => nextPage()}>
+          next
+        </button>
+      );
+    } else if (allUserPoints.previous) {
+      return (
+        <button
+          className={leaderboardStyles.btnBack}
+          onClick={() => prevPage()}
+        >
+          prev
+        </button>
+      );
     }
   };
 
   return (
     <Layout>
-      <div
-        style={{
-          background: "#fff",
-          padding: "2.5rem",
-          margin: "2rem 0",
-          height: "100vh",
-        }}
-      >
+      <div className={leaderboardStyles.main}>
         {isLoading ? (
           <div>Loading...</div>
         ) : (
@@ -58,7 +83,10 @@ const Leaderboard: React.FC = () => {
               <p style={{ fontSize: "1.4rem" }}>Points</p>
             </div>
             {allUserPoints.users.map(
-              (user: { username: string; points: number }, i: number) => {
+              (
+                user: { username: string; points: number; row_number: number },
+                i: number
+              ) => {
                 return (
                   <>
                     <div
@@ -75,7 +103,7 @@ const Leaderboard: React.FC = () => {
                           borderRight: "1px dotted #333",
                         }}
                       >
-                        {i + 1}
+                        {user.row_number}
                       </p>
                       <p
                         style={{
@@ -97,10 +125,9 @@ const Leaderboard: React.FC = () => {
                 );
               }
             )}
+            {changePage()}
           </>
         )}
-        <button onClick={() => nextPage()}>next</button>
-        <button onClick={() => prevPage()}>prev</button>
       </div>
     </Layout>
   );

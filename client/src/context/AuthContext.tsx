@@ -18,7 +18,7 @@ interface IState {
     githubdate: string | null;
   };
   allUserPoints: {
-    users: { username: string; points: number }[];
+    users: { username: string; points: number; row_number: number }[];
     prev: { page: number };
     next: { page: number };
   };
