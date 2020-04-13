@@ -94,7 +94,7 @@ const Leaderboard: React.FC = () => {
                 return (
                   <>
                     <div
-                      key={i}
+                      key={user.row_number}
                       style={{
                         display: "grid",
                         gridTemplateColumns: "repeat(3, 1fr)",
